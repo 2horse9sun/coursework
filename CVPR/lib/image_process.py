@@ -1,3 +1,7 @@
+##################################################################
+# Naive implementation of some techniques in image processing
+# @Auther 2horse9sun
+##################################################################
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,6 +29,7 @@ def mean_filter(img, size):
 
 
 def sharpening_filter(img, size, alpha):
+    # f = f + a(f - f_blur)
     return np.uint8(img + alpha*(img-mean_filter(img, size)))
 
 def thresholding_filter(img, A):
@@ -66,7 +71,6 @@ def guassian_pdf_2d(x, y, std):
 
 def guassian_filter(img, size, std):
     k = size // 2
-    
     w = np.zeros((size, size))
     for i in range(-k, k+1):
         for j in range(-k, k+1):
@@ -90,7 +94,6 @@ def guassian_filter(img, size, std):
 
 def bilateral_filter(img, size, std_s, std_r):
     k = size // 2
-    
     height = img.shape[0]
     width = img.shape[1]
     img_bilateral_filtered = np.zeros((height, width))
@@ -123,6 +126,15 @@ def inverse_fourier_transform(img_dft):
     iimg = np.fft.ifft2(ishift)
     return np.uint8(np.abs(iimg))
 
+# high-pass filter
+# Example
+# 1 1 1 1 1 1 1
+# 1 1 1 1 1 1 1
+# 1 1 0 0 0 1 1
+# 1 1 0 0 0 1 1
+# 1 1 0 0 0 1 1
+# 1 1 1 1 1 1 1
+# 1 1 1 1 1 1 1
 def generate_rect_hpf(img_dft, m, n):
     height, width = img_dft.shape
     hpf = np.ones((height, width))
@@ -140,6 +152,15 @@ def generate_circle_hpf(img_dft, r):
                 hpf[i][j] = 0
     return hpf
 
+# low-pass filter
+# Example
+# 0 0 0 0 0 0 0
+# 0 0 0 0 0 0 0
+# 0 0 1 1 1 0 0
+# 0 0 1 1 1 0 0
+# 0 0 1 1 1 0 0
+# 0 0 0 0 0 0 0
+# 0 0 0 0 0 0 0
 def generate_rect_lpf(img_dft, m, n):
     height, width = img_dft.shape
     lpf = np.zeros((height, width))
@@ -157,6 +178,7 @@ def generate_circle_lpf(img_dft, r):
                 lpf[i][j] = 1
     return lpf
 
+# subsample the image directly
 def subsample(img, factor_x, factor_y):
     height, width = img.shape
     new_height, new_width = height//factor_x, width//factor_y
@@ -166,6 +188,8 @@ def subsample(img, factor_x, factor_y):
             new_img[i][j] = img[min(int(i*factor_x), height-1)][min(int(j*factor_y), height-1)]
     return np.uint8(new_img)
 
+# 1. blur the image by lpf
+# 2. subsample the filtered image
 def subsample_after_filtered(img, factor_x, factor_y):
     img_dft = fourier_transform(img)
     magnitude = np.abs(img_dft)
@@ -177,3 +201,30 @@ def subsample_after_filtered(img, factor_x, factor_y):
     reconstructed_dft = magnitude*np.exp(np.complex(0,1)*phase)
     reconstructed_img = inverse_fourier_transform(reconstructed_dft)
     return subsample(reconstructed_img, factor_x, factor_y)
+
+# upsample the image directly, fill with 0s
+def upsample(img, factor_x, factor_y):
+    height, width = img.shape
+    new_height, new_width = height*factor_x, width*factor_y
+    new_img = np.zeros((new_height, new_width))
+    for i in range(0, height):
+        for j in range(0, width):
+            new_img[min(i*factor_x, new_height-1)][min(j*factor_y,new_width-1)] = img[i][j]
+    return np.uint8(new_img)
+
+# 1. upsample the image directly, fill with 0s
+# 2. blur the image (one technique of interpolation)
+# 3. scale up the image
+def upsample_then_filtered(img, factor_x, factor_y):
+    img_upsampled = upsample(img, factor_x, factor_y)
+    img_dft = fourier_transform(img_upsampled)
+    magnitude = np.abs(img_dft)
+    phase = np.angle(img_dft)
+    height = magnitude.shape[0]
+    width = magnitude.shape[1]
+    lpf = generate_rect_lpf(img_dft, height//2//factor_x, width//2//factor_y)
+    magnitude = magnitude*lpf
+    reconstructed_dft = magnitude*np.exp(np.complex(0,1)*phase)
+    reconstructed_img = inverse_fourier_transform(reconstructed_dft)
+    reconstructed_img = reconstructed_img*factor_x*factor_y
+    return reconstructed_img
