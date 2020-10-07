@@ -6,11 +6,10 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-def mean_filter(img, size):
+def mean_filter(img, k):
     # mean filter kernel
-    w = np.ones((size, size))
+    w = np.ones((2*k+1, 2*k+1))
     w = w / w.sum()
-    k = size // 2
     height = img.shape[0]
     width = img.shape[1]
     img_mean_filtered = np.zeros((height, width))
@@ -28,9 +27,7 @@ def mean_filter(img, size):
     return img_mean_filtered
 
 
-def sharpening_filter(img, size, alpha):
-    # f = f + a(f - f_blur)
-    return np.uint8(img + alpha*(img-mean_filter(img, size)))
+
 
 def thresholding_filter(img, A):
     height = img.shape[0]
@@ -47,8 +44,7 @@ def thresholding_filter(img, A):
     img_mean_filtered = np.uint8(img_mean_filtered)
     return img_mean_filtered
 
-def median_filter(img, size):
-    k = size // 2
+def median_filter(img, k):
     height = img.shape[0]
     width = img.shape[1]
     img_median_filtered = np.zeros((height, width))
@@ -139,31 +135,38 @@ def boundary_process(img, k, cond, padding):
             
 
 
-def gaussian_pdf_1d(x, std):
-        return np.exp(-(x**2)/(2*std*std))
+def gaussian_pdf_1d(x, sigma):
+    if sigma == 0:
+        return 1 if x==0 else 0
+    return np.exp(-(x**2)/(2*sigma*sigma))
 
-def gaussian_pdf_2d(x, y, std):
-        return np.exp(-(x**2+y**2)/(2*std*std))
+def gaussian_pdf_2d(x, y, sigma):
+    if sigma == 0:
+        return 1 if x==0 and y==0 else 0
+    return np.exp(-(x**2+y**2)/(2*sigma*sigma))
     
-def generate_gaussian_kernel_1d(k, std):
-    kernel = np.zeros((k, 1))
+def generate_gaussian_kernel_1d(k, sigma):
+    kernel = np.zeros((2*k+1, 1))
     for i in range(-k, k+1):
-        kernel[i+k] = image_process.gaussian_pdf_2d(i, std)
+        kernel[i+k] = gaussian_pdf_1d(i, sigma)
     return kernel/kernel.sum()
     
-def generate_gaussian_kernel_2d(k, std):
-    return generate_gaussian_kernel_1d(2*k+1, std).dot(generate_gaussian_kernel_1d(2*k+1, std).T)
+def generate_gaussian_kernel_2d(k, sigma):
+    return generate_gaussian_kernel_1d(k, sigma).dot(generate_gaussian_kernel_1d(k, sigma).T)
+
+def convolve_2d(w, f, m, n):
+    res = 0
+    k = w.shape[0]//2
+    l = w.shape[1]//2
+    for i in range(-k, k+1):
+        for j in range(-l, l+1):
+            res += w[i+k][j+l]*f[m-i][n-j]
+    return res
 
 
 # default boundary condition: valid convolution
-def gaussian_filter(img, size, std):
-    k = size // 2
-    w = np.zeros((size, size))
-    for i in range(-k, k+1):
-        for j in range(-k, k+1):
-            w[i+k][j+k] = gaussian_pdf_2d(i, j, std)
-    w = w / w.sum()
-    
+def gaussian_filter(img, k, sigma):
+    w = generate_gaussian_kernel_2d(k, sigma)    
     height = img.shape[0]
     width = img.shape[1]
     img_gaussian_filtered = np.zeros((height, width))
@@ -173,14 +176,38 @@ def gaussian_filter(img, size, std):
             if m < k or n < k or m >= height-k or n >= width-k:
                 img_gaussian_filtered[m][n] = img[m][n]
             else:
-                for i in range(-k, k+1):
-                    for j in range(-k, k+1):
-                        img_gaussian_filtered[m][n] += w[i+k][j+k]*img[m+i][n+j]
+                img_gaussian_filtered[m][n] = convolve_2d(w, img, m, n)
     img_gaussian_filtered = np.uint8(img_gaussian_filtered)
     return img_gaussian_filtered[k:height-k, k:width-k]
 
-def bilateral_filter(img, size, std_s, std_r):
-    k = size // 2
+def separable_gaussian_filter(img, k, sigma):
+    u = generate_gaussian_kernel_1d(k, sigma).T    
+    v = generate_gaussian_kernel_1d(k, sigma)   
+    height = img.shape[0]
+    width = img.shape[1]
+    img_gaussian_filtered = np.zeros((height, width))
+    img_gaussian_row_filtered = np.zeros((height, width))
+
+    for m in range(0, height):
+        for n in range(0, width):
+            if m < k or n < k or m >= height-k or n >= width-k:
+                img_gaussian_row_filtered[m][n] = img[m][n]
+            else:
+                img_gaussian_row_filtered[m][n] = convolve_2d(v, img, m, n)
+    for m in range(0, height):
+        for n in range(0, width):
+            if m < k or n < k or m >= height-k or n >= width-k:
+                img_gaussian_filtered[m][n] = img_gaussian_row_filtered[m][n]
+            else:
+                img_gaussian_filtered[m][n] = convolve_2d(u, img_gaussian_row_filtered, m, n)
+    img_gaussian_filtered = np.uint8(img_gaussian_filtered)
+    return img_gaussian_filtered[k:height-k, k:width-k]
+
+def sharpening_filter(img, k, sigma, alpha):
+    # f = f + a(f - f_blur)
+    return np.uint8((1+alpha)*separable_gaussian_filter(img,k,0) - alpha*separable_gaussian_filter(img, k, sigma))
+
+def bilateral_filter(img, k, sigma_s, sigma_r):
     height = img.shape[0]
     width = img.shape[1]
     img_bilateral_filtered = np.zeros((height, width))
@@ -190,17 +217,14 @@ def bilateral_filter(img, size, std_s, std_r):
             if m < k or n < k or m >= height-k or n >= width-k:
                 img_bilateral_filtered[m][n] = img[m][n]
             else:
-                w = np.zeros((size, size))
+                w = np.zeros((2*k+1, 2*k+1))
                 for i in range(-k, k+1):
                     for j in range(-k, k+1):
-                        w[i+k][j+k] = gaussian_pdf_2d(i, j, std_s) * gaussian_pdf_1d(img[m][n]-img[m+i][n+j], std_r)
+                        w[i+k][j+k] = gaussian_pdf_2d(i, j, sigma_s) * gaussian_pdf_1d(img[m][n]-img[m+i][n+j], sigma_r)
                 w = w / w.sum()
-                
-                for i in range(-k, k+1):
-                    for j in range(-k, k+1):
-                        img_bilateral_filtered[m][n] += w[i+k][j+k]*img[m+i][n+j]
+                img_bilateral_filtered[m][n] = convolve_2d(w, img, m, n)
     img_bilateral_filtered = np.uint8(img_bilateral_filtered)
-    return img_bilateral_filtered
+    return img_bilateral_filtered[k:height-k, k:width-k]
 
 
 def fourier_transform(img):
@@ -249,21 +273,24 @@ def generate_circle_hpf(img_dft, r):
 # 0 0 0 0 0 0 0
 # 0 0 0 0 0 0 0
 def generate_rect_lpf(img_dft, m, n):
-    height, width = img_dft.shape
-    lpf = np.zeros((height, width))
-    ch, cw = int(height/2), int(width/2)
-    lpf[max(0,ch-m):min(ch+m,height), max(0,cw-n):min(cw+n,width)] = 1
-    return lpf
+    return 1 - generate_rect_hpf(img_dft, m, n)
 
 def generate_circle_lpf(img_dft, r):
+    return 1 - generate_circle_hpf(img_dft, r)
+
+# H(u, v) = exp{-D(u,v)^2/2*D0^2}
+def generate_gaussian_lpf(img_dft, D0):
     height, width = img_dft.shape
     lpf = np.zeros((height, width))
     ch, cw = int(height/2), int(width/2)
-    for i in range(max(0,ch-r), min(ch+r,height)):
-        for j in range(max(0,cw-r), min(cw+r,width)):
-            if (i-ch)**2+(j-cw)**2 <= r**2:
-                lpf[i][j] = 1
+    for i in range(0, height):
+        for j in range(0, width):
+            lpf[i][j] = gaussian_pdf_2d(i-ch, j-cw, D0)
     return lpf
+
+def generate_gaussian_hpf(img_dft, D0):
+    return 1 - generate_gaussian_lpf(img_dft, D0)
+
 
 # subsample the image directly
 def subsample(img, factor_x, factor_y):
@@ -283,7 +310,7 @@ def subsample_after_filtered(img, factor_x, factor_y):
     phase = np.angle(img_dft)
     height = magnitude.shape[0]
     width = magnitude.shape[1]
-    lpf = generate_rect_lpf(img_dft, height//2//factor_x, width//2//factor_y)
+    lpf = generate_gaussian_lpf(img_dft, max(height//2//factor_x, width//2//factor_y))
     magnitude = magnitude*lpf
     reconstructed_dft = magnitude*np.exp(np.complex(0,1)*phase)
     reconstructed_img = inverse_fourier_transform(reconstructed_dft)
