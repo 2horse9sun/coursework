@@ -5,6 +5,7 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 def mean_filter(img, k):
     # mean filter kernel
@@ -342,3 +343,31 @@ def upsample_then_filtered(img, factor_x, factor_y):
     reconstructed_img = inverse_fourier_transform(reconstructed_dft)
     reconstructed_img = reconstructed_img*factor_x*factor_y
     return reconstructed_img
+
+def get_interpolation_value(img, x, y, type):
+    if int(x)==x and int(y)==y:
+        return img[int(x)][int(y)]
+    if type == 'nearest':
+        return img[min(math.floor(x+0.5), img.shape[0]-1)][min(math.floor(y+0.5), img.shape[1]-1)]
+    elif type == 'bilinear':
+        x0 = min(math.floor(x), img.shape[0]-1)
+        y0 = min(math.floor(y), img.shape[1]-1)
+        x1 = min(math.floor(x+1), img.shape[0]-1)
+        y1 = min(math.floor(y+1), img.shape[1]-1)
+        S11 = (x1-x)*(y1-y)
+        S10 = (x-x0)*(y1-y)
+        S01 = (x1-x)*(y-y0)
+        S00 = (x-x0)*(y-y0)
+        S = S11 + S10 + S01 + S00
+        return (S11*img[x0][y0]+S10*img[x0][y1]+S01*img[x1][y0]+S00*img[x1][y1])/S
+    else:
+        return 0
+    
+def upsample_with_interpolation(img, factor_x, factor_y, type):
+    height, width = img.shape
+    new_height, new_width = int(height*factor_x), int(width*factor_y)
+    new_img = np.zeros((new_height, new_width))
+    for i in range(0, new_height):
+        for j in range(0, new_width):
+            new_img[i][j] = get_interpolation_value(img, i/factor_x, j/factor_y, type)
+    return np.uint8(new_img)
