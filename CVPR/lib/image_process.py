@@ -371,3 +371,106 @@ def upsample_with_interpolation(img, factor_x, factor_y, type):
         for j in range(0, new_width):
             new_img[i][j] = get_interpolation_value(img, i/factor_x, j/factor_y, type)
     return np.uint8(new_img)
+
+
+def get_sobel_x():
+    return np.array([[-1, 0, 1]]).T, np.array([[1, 2, 1]])
+def get_sobel_y():
+    return np.array([[1, 2, 1]]).T, np.array([[-1, 0, 1]])
+
+# sobel-based
+def gradient(img):
+    k = 1
+    u_x, v_x = get_sobel_x()   
+    u_y, v_y = get_sobel_y()  
+    height = img.shape[0]
+    width = img.shape[1]
+    gradient_x = np.zeros((height, width))
+    gradient_x_row = np.zeros((height, width))
+    gradient_y = np.zeros((height, width))
+    gradient_y_row = np.zeros((height, width))
+    gradient = np.zeros((height, width, 2))
+
+    for m in range(0, height):
+        for n in range(0, width):
+            if m < k or n < k or m >= height-k or n >= width-k:
+                gradient_x_row[m][n] = img[m][n]
+            else:
+                gradient_x_row[m][n] = convolve_2d(v_x, img, m, n)
+                
+    for m in range(0, height):
+        for n in range(0, width):
+            if m < k or n < k or m >= height-k or n >= width-k:
+                gradient_x[m][n] = gradient_x_row[m][n]
+            else:
+                gradient_x[m][n] = convolve_2d(u_x, gradient_x_row, m, n)
+    
+    for m in range(0, height):
+        for n in range(0, width):
+            if m < k or n < k or m >= height-k or n >= width-k:
+                gradient_y_row[m][n] = img[m][n]
+            else:
+                gradient_y_row[m][n] = convolve_2d(v_y, img, m, n)
+    for m in range(0, height):
+        for n in range(0, width):
+            if m < k or n < k or m >= height-k or n >= width-k:
+                gradient_y[m][n] = gradient_y_row[m][n]
+            else:
+                gradient_y[m][n] = convolve_2d(u_y, gradient_y_row, m, n)
+    
+    gradient[:, :, 0] = gradient_x[:, :]
+    gradient[:, :, 1] = gradient_y[:, :]
+    
+    return gradient[k:height-k, k:width-k, :]
+
+# non-maximum supression
+def nms(gradient):
+    magnitude = np.sqrt(gradient[:, :, 0]**2 + gradient[:, :, 1]**2)
+    height = gradient.shape[0]
+    width = gradient.shape[1]
+    nms = np.zeros((height, width))
+    
+    for m in range(1, height-1):
+        for n in range(1, width-1):
+            q = [m, n]
+            q = np.array(q)
+            q_gradient = gradient[m][n]
+            q_magnitude = magnitude[m][n]
+            if q_magnitude==0:
+                continue
+            r = q + q_gradient/q_magnitude
+            p = q - q_gradient/q_magnitude
+            r_magnitude = get_interpolation_value(magnitude, r[0], r[1], 'bilinear')
+            p_magnitude = get_interpolation_value(magnitude, p[0], p[1], 'bilinear')
+            if q_magnitude>r_magnitude and q_magnitude>p_magnitude:
+                nms[m][n] = 0
+            else:
+                nms[m][n] = magnitude[m][n]
+    return nms
+
+def connect_edges(low, high, visited, m, n):
+    if high[m][n] == 0 or low[m][n] == 0:
+        return
+    dx = [-1, 0, 1]
+    dy = [-1, 0, 1]
+    queue = []
+    queue.append([m, n])
+    while len(queue) != 0:
+        curr = queue.pop()
+        x = curr[0]
+        y = curr[1]
+        high[x][y] = 255
+        visited[x][y] = 1
+        for i in range(0, 3):
+            for j in range(0, 3):
+                if x+dx[i]>=0 and x+dx[i]<low.shape[0] and y+dy[j]>=0 and y+dy[j]<low.shape[1]:
+                    if visited[x+dx[i]][y+dy[j]]!=1 and low[x+dx[i]][y+dy[j]]!=0:
+                        queue.append([x+dx[i], y+dy[j]])
+                        
+def hysteresis_thresholding(low, high):
+    height = high.shape[0]
+    width = high.shape[1]
+    visited = np.zeros((height, width))
+    for m in range(0, height):
+        for n in range(0, width):
+            connect_edges(low, high, visited, m, n)
