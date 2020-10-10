@@ -121,15 +121,15 @@ def boundary_process(img, k, cond, padding):
         return np.uint8(new_img)
     if padding == 'reflect':
         reflect_img = np.zeros((3*height, 3*width))
-        reflect_img[0*height:(0+1)*height, 0*width:(0+1)*width] = img.T
+        reflect_img[0*height:(0+1)*height, 0*width:(0+1)*width] = np.fliplr(np.flipud(img))
         reflect_img[0*height:(0+1)*height, 1*width:(1+1)*width] = np.flipud(img)
-        reflect_img[0*height:(0+1)*height, 2*width:(2+1)*width] = img.T
+        reflect_img[0*height:(0+1)*height, 2*width:(2+1)*width] = np.fliplr(np.flipud(img))
         reflect_img[1*height:(1+1)*height, 0*width:(0+1)*width] = np.fliplr(img)
         reflect_img[1*height:(1+1)*height, 1*width:(1+1)*width] = img
         reflect_img[1*height:(1+1)*height, 2*width:(2+1)*width] = np.fliplr(img)
-        reflect_img[2*height:(2+1)*height, 0*width:(0+1)*width] = img.T
+        reflect_img[2*height:(2+1)*height, 0*width:(0+1)*width] = np.fliplr(np.flipud(img))
         reflect_img[2*height:(2+1)*height, 1*width:(1+1)*width] = np.flipud(img)
-        reflect_img[2*height:(2+1)*height, 2*width:(2+1)*width] = img.T
+        reflect_img[2*height:(2+1)*height, 2*width:(2+1)*width] = np.fliplr(np.flipud(img))
         new_img = reflect_img[height-dh:2*height+dh, width-dw:2*width+dw]
         return np.uint8(new_img)
     
@@ -442,7 +442,7 @@ def nms(gradient):
             p = q - q_gradient/q_magnitude
             r_magnitude = get_interpolation_value(magnitude, r[0], r[1], 'bilinear')
             p_magnitude = get_interpolation_value(magnitude, p[0], p[1], 'bilinear')
-            # find local maxima
+            # find local maximum
             if q_magnitude>r_magnitude and q_magnitude>p_magnitude:
                 nms[m][n] = magnitude[m][n]
             else:
@@ -479,3 +479,26 @@ def hysteresis_thresholding(img, tl, th):
         for n in range(0, width):
             connect_edges(low, high, visited, m, n)
     return high
+
+def compute_second_moment_matrix(img, k, sigma):
+    # compute gradients Ix, Iy
+    gradient_xy = gradient(boundary_process(img, k, 'same', 'reflect'))
+    Ix = gradient_xy[:, :, 0]
+    Iy = gradient_xy[:, :, 1]
+    # compute Ix2, Iy2, Ixy
+    Ix2 = Ix*Ix
+    Iy2 = Iy*Iy
+    Ixy = Ix*Iy
+    # convovle with window function: Gaussian
+    g_Ix2 = separable_gaussian_filter(boundary_process(Ix2, k, 'same', 'reflect'), k, sigma)
+    g_Iy2 = separable_gaussian_filter(boundary_process(Iy2, k, 'same', 'reflect'), k, sigma)
+    g_Ixy = separable_gaussian_filter(boundary_process(Ixy, k, 'same', 'reflect'), k, sigma)
+    # assemble matrix at each pixel
+    height = img.shape[0]
+    width = img.shape[1]
+    smm_map = np.zeros((height, width, 2, 2))
+    for m in range(0, height):
+        for n in range(0, width):
+            smm_map[m][n] = np.array([[g_Ix2[m][n], g_Ixy[m][n]],
+                                                       [g_Ixy[m][n], g_Ixy[m][n]]])
+    return smm_map
