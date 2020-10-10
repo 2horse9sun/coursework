@@ -442,10 +442,11 @@ def nms(gradient):
             p = q - q_gradient/q_magnitude
             r_magnitude = get_interpolation_value(magnitude, r[0], r[1], 'bilinear')
             p_magnitude = get_interpolation_value(magnitude, p[0], p[1], 'bilinear')
+            # find local maxima
             if q_magnitude>r_magnitude and q_magnitude>p_magnitude:
-                nms[m][n] = 0
-            else:
                 nms[m][n] = magnitude[m][n]
+            else:
+                nms[m][n] = 0
     return nms
 
 def connect_edges(low, high, visited, m, n):
@@ -463,14 +464,18 @@ def connect_edges(low, high, visited, m, n):
         visited[x][y] = 1
         for i in range(0, 3):
             for j in range(0, 3):
+                # weak edges
                 if x+dx[i]>=0 and x+dx[i]<low.shape[0] and y+dy[j]>=0 and y+dy[j]<low.shape[1]:
                     if visited[x+dx[i]][y+dy[j]]!=1 and low[x+dx[i]][y+dy[j]]!=0:
                         queue.append([x+dx[i], y+dy[j]])
                         
-def hysteresis_thresholding(low, high):
+def hysteresis_thresholding(img, tl, th):
+    low = thresholding_filter(img, tl)
+    high = thresholding_filter(img, th)
     height = high.shape[0]
     width = high.shape[1]
     visited = np.zeros((height, width))
     for m in range(0, height):
         for n in range(0, width):
             connect_edges(low, high, visited, m, n)
+    return high
