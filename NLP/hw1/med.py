@@ -1,4 +1,5 @@
 import sys
+import time
 
 # Function to find Minimum Edit Distance between str1 and str2
 # m and n are the number of characters in str1 and str2 respectively
@@ -101,6 +102,3 @@ if __name__ == '__main__':
 		print("MED: {}".format(med))
 		print("Table:\n{}".format(T))
 		output_steps(T, str1, str2)
-
-
-
