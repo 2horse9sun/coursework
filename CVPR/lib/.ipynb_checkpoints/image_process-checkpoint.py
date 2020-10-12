@@ -394,7 +394,7 @@ def gradient(img):
     for m in range(0, height):
         for n in range(0, width):
             if m < k or n < k or m >= height-k or n >= width-k:
-                gradient_x_row[m][n] = img[m][n]
+                gradient_x_row[m][n] = 0
             else:
                 gradient_x_row[m][n] = convolve_2d(v_x, img, m, n)
                 
@@ -408,7 +408,7 @@ def gradient(img):
     for m in range(0, height):
         for n in range(0, width):
             if m < k or n < k or m >= height-k or n >= width-k:
-                gradient_y_row[m][n] = img[m][n]
+                gradient_y_row[m][n] = 0
             else:
                 gradient_y_row[m][n] = convolve_2d(v_y, img, m, n)
     for m in range(0, height):
@@ -480,9 +480,11 @@ def hysteresis_thresholding(img, tl, th):
             connect_edges(low, high, visited, m, n)
     return high
 
+
+# MAY HAVE SOME BUGS !!!
 def compute_second_moment_matrix(img, k, sigma):
     # compute gradients Ix, Iy
-    gradient_xy = gradient(boundary_process(img, k, 'same', 'reflect'))
+    gradient_xy = gradient(boundary_process(img, 1, 'same', 'reflect'))
     Ix = gradient_xy[:, :, 0]
     Iy = gradient_xy[:, :, 1]
     # compute Ix2, Iy2, Ixy
@@ -500,5 +502,5 @@ def compute_second_moment_matrix(img, k, sigma):
     for m in range(0, height):
         for n in range(0, width):
             smm_map[m][n] = np.array([[g_Ix2[m][n], g_Ixy[m][n]],
-                                                       [g_Ixy[m][n], g_Ixy[m][n]]])
+                                    [g_Ixy[m][n], g_Iy2[m][n]]])
     return smm_map
