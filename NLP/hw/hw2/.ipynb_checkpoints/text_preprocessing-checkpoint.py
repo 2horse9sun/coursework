@@ -6,6 +6,7 @@ import sklearn
 import importlib
 import sys 
 import os
+import nltk
 nltk.download('punkt')
 nltk.download('words')
 nltk.download('averaged_perceptron_tagger')
@@ -57,4 +58,4 @@ def text_preprocessing(txt_paths):
     data = np.append(data, [[data[:, i].sum() for i in range(data.shape[1])]], axis=0)
     data = data.T[data.T[:,data.shape[0]-1].argsort()].T
     print("Finish preprocessing !")
-    return data[0:data.shape[0]-2, data.shape[1]-2000:]
+    return data[0:data.shape[0]-2, data.shape[1]-5000:]
