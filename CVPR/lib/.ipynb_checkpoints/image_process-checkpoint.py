@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
+##################################################################
+# Filtering
+##################################################################
 def mean_filter(img, k):
     # mean filter kernel
     w = np.ones((2*k+1, 2*k+1))
@@ -292,57 +295,43 @@ def generate_gaussian_lpf(img_dft, D0):
 def generate_gaussian_hpf(img_dft, D0):
     return 1 - generate_gaussian_lpf(img_dft, D0)
 
-
+##################################################################
+# Transform
+##################################################################
 # subsample the image directly
-def subsample(img, factor_x, factor_y):
+def subsample(img):
     height, width = img.shape
-    new_height, new_width = height//factor_x, width//factor_y
+    new_height, new_width = height//2, width//2
     new_img = np.zeros((new_height, new_width))
     for i in range(0, new_height):
         for j in range(0, new_width):
-            new_img[i][j] = img[min(int(i*factor_x), height)][min(int(j*factor_y), height)]
+            new_img[i][j] = img[min(int(i*2), height)][min(int(j*2), height)]
     return np.uint8(new_img)
 
 # 1. blur the image by lpf
 # 2. subsample the filtered image
-def subsample_after_filtered(img, factor_x, factor_y):
-    img_dft = fourier_transform(img)
-    magnitude = np.abs(img_dft)
-    phase = np.angle(img_dft)
-    height = magnitude.shape[0]
-    width = magnitude.shape[1]
-    lpf = generate_gaussian_lpf(img_dft, max(height//2//factor_x, width//2//factor_y))
-    magnitude = magnitude*lpf
-    reconstructed_dft = magnitude*np.exp(np.complex(0,1)*phase)
-    reconstructed_img = inverse_fourier_transform(reconstructed_dft)
-    return subsample(reconstructed_img, factor_x, factor_y)
+def subsample_after_filtered(img):
+    img_filtered = cv2.GaussianBlur(img,(5,5),1.0825)
+    return subsample(img_filtered)
 
 # upsample the image directly, fill with 0s
-def upsample(img, factor_x, factor_y):
+def upsample(img):
     height, width = img.shape
-    new_height, new_width = height*factor_x, width*factor_y
+    new_height, new_width = height*2, width*2
     new_img = np.zeros((new_height, new_width))
     for i in range(0, height):
         for j in range(0, width):
-            new_img[min(i*factor_x, new_height)][min(j*factor_y,new_width)] = img[i][j]
+            new_img[min(i*2, new_height)][min(j*2,new_width)] = img[i][j]
     return np.uint8(new_img)
 
 # 1. upsample the image directly, fill with 0s
 # 2. blur the image (one technique of interpolation)
 # 3. scale up the image
-def upsample_then_filtered(img, factor_x, factor_y):
-    img_upsampled = upsample(img, factor_x, factor_y)
-    img_dft = fourier_transform(img_upsampled)
-    magnitude = np.abs(img_dft)
-    phase = np.angle(img_dft)
-    height = magnitude.shape[0]
-    width = magnitude.shape[1]
-    lpf = generate_rect_lpf(img_dft, height//2//factor_x, width//2//factor_y)
-    magnitude = magnitude*lpf
-    reconstructed_dft = magnitude*np.exp(np.complex(0,1)*phase)
-    reconstructed_img = inverse_fourier_transform(reconstructed_dft)
-    reconstructed_img = reconstructed_img*factor_x*factor_y
-    return reconstructed_img
+def upsample_then_filtered(img):
+    img_upsampled = upsample(img)
+    img_filtered = cv2.GaussianBlur(img_upsampled,(5,5),1.0825)
+    img_filtered = img_filtered*2*2
+    return img_filtered
 
 def get_interpolation_value(img, x, y, type):
     if int(x)==x and int(y)==y:
@@ -359,20 +348,78 @@ def get_interpolation_value(img, x, y, type):
         S01 = (x1-x)*(y-y0)
         S00 = (x-x0)*(y-y0)
         S = S11 + S10 + S01 + S00
+        if S==0:
+            return img[int(x)][int(y)]
         return (S11*img[x0][y0]+S10*img[x0][y1]+S01*img[x1][y0]+S00*img[x1][y1])/S
     else:
         return 0
     
-def upsample_with_interpolation(img, factor_x, factor_y, type):
+def upsample_with_interpolation(img, factor, type):
     height, width = img.shape
-    new_height, new_width = int(height*factor_x), int(width*factor_y)
+    new_height, new_width = int(height*factor), int(width*factor)
     new_img = np.zeros((new_height, new_width))
     for i in range(0, new_height):
         for j in range(0, new_width):
-            new_img[i][j] = get_interpolation_value(img, i/factor_x, j/factor_y, type)
+            new_img[i][j] = get_interpolation_value(img, i/factor, j/factor, type)
     return np.uint8(new_img)
 
 
+def get_translation_kernel(x, y):
+    return np.array([[1,0,x],
+                    [0,1,y],
+                    [0,0,1]])
+def get_rotation_kernel(theta):
+    theta = theta*np.pi/180
+    return np.array([[np.cos(theta),-np.sin(theta),0],
+                    [np.sin(theta),np.cos(theta),0],
+                    [0,0,1]])
+def get_euclidean_kernel(x, y, theta):
+    theta = theta*np.pi/180
+    return np.array([[np.cos(theta),-np.sin(theta),x],
+                    [np.sin(theta),np.cos(theta),y],
+                    [0,0,1]])
+def get_similarity_kernel(x, y, theta, s):
+    theta = theta*np.pi/180
+    return np.array([[s*np.cos(theta),-s*np.sin(theta),x],
+                    [s*np.sin(theta),s*np.cos(theta),y],
+                    [0,0,1]])
+
+def forward_warping(img, kernel):
+    height = img.shape[0]
+    width = img.shape[1]
+    img_transformed = np.zeros((height, width))
+    for m in range(0, height):
+        for n in range(0, width):
+            pos = kernel.dot(np.array([[m],
+                                      [n],
+                                      [1]]))
+            mm = int(pos[0][0])
+            nn = int(pos[1][0])
+            if mm>=0 and mm<height and nn>=0 and nn<width:
+                img_transformed[mm][nn] = img[m][n]
+    return np.uint8(img_transformed)
+    
+    
+def inverse_warping(img, kernel):
+    height = img.shape[0]
+    width = img.shape[1]
+    img_transformed = np.zeros((height, width))
+    for m in range(0, height):
+        for n in range(0, width):
+            pos = np.linalg.inv(kernel).dot(np.array([[m],
+                                      [n],
+                                      [1]]))
+            mm = pos[0][0]
+            nn = pos[1][0]
+            if mm>=0 and mm<height and nn>=0 and nn<width:
+                img_transformed[m][n] = get_interpolation_value(img, mm, nn, 'bilinear')
+    return np.uint8(img_transformed)
+    
+
+
+##################################################################
+# Feature Detection
+##################################################################
 def get_sobel_x():
     return np.array([[-1, 0, 1]]).T, np.array([[1, 2, 1]])
 def get_sobel_y():
@@ -389,7 +436,6 @@ def gradient(img):
     gradient_x_row = np.zeros((height, width))
     gradient_y = np.zeros((height, width))
     gradient_y_row = np.zeros((height, width))
-    gradient = np.zeros((height, width, 2))
 
     for m in range(0, height):
         for n in range(0, width):
@@ -418,23 +464,20 @@ def gradient(img):
             else:
                 gradient_y[m][n] = convolve_2d(u_y, gradient_y_row, m, n)
     
-    gradient[:, :, 0] = gradient_x[:, :]
-    gradient[:, :, 1] = gradient_y[:, :]
-    
-    return gradient[k:height-k, k:width-k, :]
+    return gradient_x[k:height-k, k:width-k], gradient_y[k:height-k, k:width-k]
 
-# non-maximum supression
-def nms(gradient):
-    magnitude = np.sqrt(gradient[:, :, 0]**2 + gradient[:, :, 1]**2)
-    height = gradient.shape[0]
-    width = gradient.shape[1]
+# non-maximum supression, gradient
+def nms(gradX, gradY):
+    magnitude = np.sqrt(gradX[:, :]**2 + gradY[:, :]**2)
+    height = gradX.shape[0]
+    width = gradX.shape[1]
     nms = np.zeros((height, width))
     
     for m in range(1, height-1):
         for n in range(1, width-1):
             q = [m, n]
             q = np.array(q)
-            q_gradient = gradient[m][n]
+            q_gradient = [gradX[m][n], gradY[m][n]]
             q_magnitude = magnitude[m][n]
             if q_magnitude==0:
                 continue
@@ -470,8 +513,8 @@ def connect_edges(low, high, visited, m, n):
                         queue.append([x+dx[i], y+dy[j]])
                         
 def hysteresis_thresholding(img, tl, th):
-    low = thresholding_filter(img, tl)
-    high = thresholding_filter(img, th)
+    _, low = cv2.threshold(img, tl, 255, cv2.THRESH_BINARY)
+    _, high = cv2.threshold(img, th, 255, cv2.THRESH_BINARY)
     height = high.shape[0]
     width = high.shape[1]
     visited = np.zeros((height, width))
@@ -481,20 +524,18 @@ def hysteresis_thresholding(img, tl, th):
     return high
 
 
-# MAY HAVE SOME BUGS !!!
 def compute_second_moment_matrix(img, k, sigma):
     # compute gradients Ix, Iy
-    gradient_xy = gradient(boundary_process(img, 1, 'same', 'reflect'))
-    Ix = gradient_xy[:, :, 0]
-    Iy = gradient_xy[:, :, 1]
+    Ix = cv2.Sobel(img, ddepth=cv2.CV_32F, dx=1, dy=0)
+    Iy = cv2.Sobel(img, ddepth=cv2.CV_32F, dx=0, dy=1)
     # compute Ix2, Iy2, Ixy
     Ix2 = Ix*Ix
     Iy2 = Iy*Iy
     Ixy = Ix*Iy
     # convovle with window function: Gaussian
-    g_Ix2 = separable_gaussian_filter(boundary_process(Ix2, k, 'same', 'reflect'), k, sigma)
-    g_Iy2 = separable_gaussian_filter(boundary_process(Iy2, k, 'same', 'reflect'), k, sigma)
-    g_Ixy = separable_gaussian_filter(boundary_process(Ixy, k, 'same', 'reflect'), k, sigma)
+    g_Ix2 = cv2.GaussianBlur(Ix2,(2*k+1, 2*k+1),sigma)
+    g_Iy2 = cv2.GaussianBlur(Iy2,(2*k+1, 2*k+1),sigma)
+    g_Ixy = cv2.GaussianBlur(Ixy,(2*k+1, 2*k+1),sigma)
     # assemble matrix at each pixel
     height = img.shape[0]
     width = img.shape[1]
@@ -504,3 +545,23 @@ def compute_second_moment_matrix(img, k, sigma):
             smm_map[m][n] = np.array([[g_Ix2[m][n], g_Ixy[m][n]],
                                     [g_Ixy[m][n], g_Iy2[m][n]]])
     return smm_map
+
+# non-maximum supression, 2d
+def nms_2d(img, threshold):
+    dx = [-1, 0, 1]
+    dy = [-1, 0, 1]
+    height = img.shape[0]
+    width = img.shape[1]
+    nms = np.zeros((height, width))
+    
+    for m in range(1, height-1):
+        for n in range(1, width-1):
+            center = img[m][n]
+            neighbours = []
+            for i in range(0, 3):
+                for j in range(0, 3):
+                    if m+dx[i]>=0 and m+dx[i]<height and n+dy[j]>=0 and n+dy[j]<width:
+                        neighbours.append(img[m+dx[i]][n+dy[j]])
+            if center == max(neighbours) and center > threshold:
+                nms[m][n] = 255
+    return np.uint8(nms)
