@@ -526,8 +526,8 @@ def hysteresis_thresholding(img, tl, th):
 
 def compute_second_moment_matrix(img, k, sigma):
     # compute gradients Ix, Iy
-    Ix = cv2.Sobel(img, ddepth=cv2.CV_32F, dx=1, dy=0)
-    Iy = cv2.Sobel(img, ddepth=cv2.CV_32F, dx=0, dy=1)
+    Ix = cv2.Sobel(img, ddepth=cv2.CV_64F, dx=1, dy=0)
+    Iy = cv2.Sobel(img, ddepth=cv2.CV_64F, dx=0, dy=1)
     # compute Ix2, Iy2, Ixy
     Ix2 = Ix*Ix
     Iy2 = Iy*Iy
