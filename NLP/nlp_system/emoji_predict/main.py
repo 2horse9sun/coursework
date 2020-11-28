@@ -1,100 +1,64 @@
+# encoding = utf-8
+# 用于验证情感分析的正确性
+api_use= False
+import textblob
 from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import numpy as np 
-import re
-import os 
+from gensim.models import Word2Vec
+# from sklearn.externals 
+import joblib
 analyzer = SentimentIntensityAnalyzer()
+w2v_model = Word2Vec.load('../data/w2v.model')
 subjective_limit = 0.1
-path = os.getcwd()+'\\'
-api_use=True
 error = 0.05
-from nltk.corpus import twitter_samples
-from nltk.tag import pos_tag, pos_tag_sents
-from nltk.stem.wordnet import WordNetLemmatizer
-from nltk import FreqDist
-if not api_use:
-    stopwords_list = 'a about after all also always am an and any are at be been being but by came can come could did do does doing else for from get give goes going had happen has have having how i if ill im in into is it its just keep let like made make many may me mean more most much no not now of only or our really say see some something take tell than that the their them then they thing this to try up us use used uses very want was way we what when where which who why will with without wont you your youre'
-    stopwords = stopwords_list.split()
-    lemmatizer = WordNetLemmatizer()
-def clean_sentences(each_tweet):
-    new_text = []
-    new_tweet=''
-    state_list = pos_tag(each_tweet)
-    for word, state in state_list:
-        # remove trends
-        if word.startswith('#'):
-            word = ''
-        # remove website urls
-        word = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:[0-9a-fA-F][0-9a-fA-F]))+', '', word)
-        # remove userids
-        word = re.sub('(@[A-Za-z0-9_]+)', '', word)
-        # # remove numerical words
-        # word = re.sub(non_word, '', word)
-        
-        if state.startswith('NN'):
-            pos = 'n'
-        elif state.startswith('VB'):
-            pos = 'v'
-        else:
-            pos='a'
-        new_word = lemmatizer.lemmatize(word,pos)
-        if len(new_word) > 0 and new_word not in string.punctuation and new_word.lower() not in stopwords:
-            new_text.append(new_word.lower()) 
-        new_tweet+=' '+new_word.lower()
-    return new_text, new_tweet 
+maxlen  = 200
+batch_size = 50
+
+# 取得所有单词
+vocab_list = list(w2v_model.wv.vocab.keys())
+# 每个词语对应的索引
+word_index = {word: index for index, word in enumerate(vocab_list)}
+
+from keras.preprocessing.sequence import pad_sequences
+# from nltk.corpus import twitter_samples
+# from nltk.tag import pos_tag, pos_tag_sents
+# from nltk.stem.wordnet import WordNetLemmatizer
+# from nltk import FreqDist
+from review_preprocessor import clean_review,get_index
+from keras.models import load_model
 
 if not api_use:
-    tokens = np.load(path+'tokens.npy')
-    xvecs = np.load(path+'tfvecMatrix.npy')
-    ylabels = np.load(path+'yLabel.npy')
-
-def tfvec_gen(words, tokens,  smoothing = False):
-    dct = dict.fromkeys(tokens, 0)
-    for word in words:
-        if word in tokens:
-            dct[word] +=1
-    vec = [dct[token]for token in tokens]
-    # print(vec)
-    if smoothing: 
-        text_words = len(words)
-        total_tokens = len(tokens)
-        vec = [(x+1)/(text_words+total_tokens) for x in vec]
-    return vec
-
-
-    
-if not api_use:
-    from sklearn import naive_bayes
-    from sklearn.svm import SVC
-    from sklearn.model_selection import GridSearchCV
-
-    clf1 = naive_bayes.GaussianNB()
-    clf1.fit(xvecs, ylabels)
-    clf2 = naive_bayes.MultinomialNB()
-    clf2.fit(xvecs, ylabels)
-    #svm
-    svc = SVC(kernel='rbf', class_weight='balanced',)
-    c_range = np.logspace(-5, 15, 11, base=2)
-    gamma_range = np.logspace(-9, 3, 13, base=2)
-    # 网格搜索交叉验证的参数范围，cv=3,3折交叉，n_jobs=-1，多核计算
-    param_grid = [{'kernel': ['rbf'], 'C': c_range, 'gamma': gamma_range}]
-    grid = GridSearchCV(svc, param_grid, cv=3, n_jobs=-1)
-    clf3 = grid.fit(xvecs, ylabels)
-
+    # clf_svm = joblib.load('../models/svm.pkl')
+    # clf_bys = joblib.load('../models/bys.pkl')
+    clf_cnn = load_model('../models/cnn_model.hdf5')
+    clf_lstm = load_model('../models/lstm_model.hdf5')
 
 def sentiment_predict(sentence):
-    if not api_use:
-        words = clean_sentences(sentence)[0]
-        xvec = tfvec_gen(words, tokens)
-        tblob = TextBlob(sentence)
-        vs = analyzer.polarity_scores(sentence)
-        clf1_result = clf1.predict(xvec)
-        clf2_result = clf2.predict(xvec)
-        print(clf1_result,clf1_result)
     tblob = TextBlob(sentence)
     vs = analyzer.polarity_scores(sentence)
     polarity = (tblob.polarity+vs['pos']-vs['neg'])/2
+    if not api_use:
+        cleaned = clean_review(sentence)
+        vec_pad = word_vec(cleaned)
+        x_input = np.zeros((batch_size,maxlen))
+        x_input[0] = vec_pad
+        # po1 = clf_svm.predict(vec_pad)
+        # po2 = clf_bys.predict(vec_pad)
+        po3 = clf_cnn.predict(x_input)
+        print('cnn generated polarity = ',po3[0])
+        po4 = clf_lstm.predict(x_input)
+        print('lstm generated polarity = ', po4[0])
+        # self_trained_po = 0.1*(po1+po2)+0.4*(po3+po4)
+        self_trained_po = 0.5*(po3[0][0]+po4[0][0])
+        print('api generated polarity = ',polarity)
+        polarity = polarity/2+self_trained_po-0.5
     return polarity, tblob.subjectivity
+
+def word_vec(cleaned_sentence):
+    vec = get_index(cleaned_sentence, word_index)
+    [vec_pad,] = pad_sequences([vec,],maxlen=maxlen)
+    return vec_pad
 
 import random
 def getrightindex(buf, po_score):
@@ -110,12 +74,16 @@ def getrightindex(buf, po_score):
 def img_gen(sentence):
     po_score, sub_score = sentiment_predict(sentence)
     if sub_score>subjective_limit:
-        if po_score>0:
-            uni = "&#x1f60a;"
+        if po_score>0.5:
+            uni = "0x1f602"
+        elif po_score>0:
+            uni = "0x+1F60a"
         else:
-            uni = "&#x1f622;"
+            uni = "0x+1F622"
     else:
-        uni = "&#x1F633;"
+        uni = "0x+1F633"
+    # 以下为较精细化的表情生成过程
+    # 更正：因为网页显示原因，此部分已经停用。
     #     index = getrightindex(buf, po_score)
     #     # print(index)
     #     uni = emoji_list[index]['UNICODE']
@@ -137,6 +105,8 @@ def nouns(sentence):
     blob = TextBlob(sentence)
     np = blob.noun_phrases
     return np
+
+'''
 # # emoji_map[UNICODE] = {'name': NAME, 'tags': [TAG0, TAG1, TAG2...], 'sentiment': SENTIMENT}
 # def tonp(emoji_list):
 #     length = len(emoji_list)
@@ -148,6 +118,7 @@ def nouns(sentence):
 #         emoji_np[i][2]=emoji['sentiment']
 #         emoji_np[i][3]=emoji['tags']
 #     return emoji_np
+'''
 
 def buflist(emoji_list):
     l= len(emoji_list)
@@ -194,23 +165,7 @@ def indexbytag(emoji_list):
     # taglists = new_list.keys
     return new_list
 
-
-def predict_emoji(input_str):
-    emoji_list = load_emoji('./emoji_predict/emoji_map.txt')
-    emoji_list.sort(key= lambda x:x['sentiment'])
-    # emoji_np = np.array(emoji_list)
-    buf = buflist(emoji_list)
-    buflimits=np.array([buffer[1] for buffer in buf])
-    tag_dict = indexbytag(emoji_list)
-    # print(buf)
-    # print(emoji_np[0])
-    # print(emoji_list[-1])
-    polarity, subjectivity = sentiment_predict(input_str)
-    emoji = img_gen(input_str)
-    return {"emoji": emoji, "polarity": polarity, "subjectivity": subjectivity}
-
 if __name__=='__main__':
-    print(predict_emoji("angry"))
     emoji_list = load_emoji('emoji_map.txt')
     emoji_list.sort(key= lambda x:x['sentiment'])
     # emoji_np = np.array(emoji_list)
@@ -220,7 +175,7 @@ if __name__=='__main__':
     # print(buf)
     # print(emoji_np[0])
     # print(emoji_list[-1])
-    s = "language processing"
+    s = "it is nice weather today."
     polarity, subjectivity = sentiment_predict(s)
     print(polarity)
     print(img_gen(s))
