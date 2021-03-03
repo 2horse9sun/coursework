@@ -108,18 +108,18 @@ def profile(model, device, train_loader):
     dataiter = iter(train_loader)
     data, target = dataiter.next()
     data, target = data.to(device), target.to(device)
-    with torch.autograd.profiler.profile(use_cuda=False) as prof:
+    with torch.autograd.profiler.profile(use_cuda=True) as prof:
         model(data[0].reshape(1,1,28,28))
     print(prof)
 
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=1, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=14, metavar='N',
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
