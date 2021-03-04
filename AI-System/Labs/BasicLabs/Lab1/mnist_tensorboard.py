@@ -172,7 +172,7 @@ def main():
     dataiter = iter(train_loader)
     images, labels = dataiter.next()
 
-    # 源代码缺少此行，若使用CUDA会报错？？？
+    # 原代码需要加上此行，保证数据和模型都在同一个device之中，否则使用CUDA模式时会报错
     images, labels = images.to(device), labels.to(device)
 
     # show batch images
