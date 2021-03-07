@@ -1,5 +1,9 @@
 # 实验报告
 
+https://github.com/2horse9sun/coursework/blob/main/AI-System/Labs/BasicLabs/Lab1/lab1-report.md
+
+（图片存储在github仓库中，若因网络原因无法显示，请查看pdf文件）
+
 ## 1. 实验环境
 
 ### 1.1 硬件环境
@@ -37,6 +41,8 @@ CUDA版本: 11.0
 网络分析，使用率前十名的操作(使用CUDA): 
 
 ![Lab1-result-batchsize64-cuda](https://raw.githubusercontent.com/2horse9sun/coursework/main/AI-System/imgs/Lab1-result-batchsize64-cuda.png)
+
+通过分析可以看出，卷积操作占用了大多数CPU时间，因此对卷积进行重点优化可以提升性能。
 
 ### 2.2 网络分析，不同批大小结果比较
 

@@ -112,12 +112,13 @@ def profile(model, device, train_loader):
     with torch.autograd.profiler.profile(use_cuda=False) as prof:
         model(data[0].reshape(1,1,28,28))
     print(prof)
+    # 打印出cpu使用时间前10名
     print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
 
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=1, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')

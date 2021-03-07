@@ -174,6 +174,7 @@ def main():
 
     # 原代码需要加上此行，保证数据和模型都在同一个device之中，否则使用CUDA模式时会报错
     images, labels = images.to(device), labels.to(device)
+    # -------------------------------------------------------------------------
 
     # show batch images
     grid = torchvision.utils.make_grid(images)
