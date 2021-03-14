@@ -33,5 +33,3 @@ CUDA版本: 11.0
 ### 2.3 基于C++的定制化张量运算
 
 ![Lab2-custom-cpp](https://raw.githubusercontent.com/2horse9sun/coursework/main/AI-System/imgs/Lab2-custom-cpp.png)
-
-### 2.4 结果分析

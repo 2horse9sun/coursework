@@ -29,5 +29,3 @@ CUDA版本: 11.0
 ### 2.2 With CUDA
 
 ![Lab3-cuda](https://raw.githubusercontent.com/2horse9sun/coursework/main/AI-System/imgs/Lab3-cuda.png)
-
-### 2.3 结果分析
