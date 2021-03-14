@@ -42,6 +42,7 @@ opener = urllib.request.build_opener()
 opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 urllib.request.install_opener(opener)
 
+<<<<<<< HEAD
 def profile(model, device, train_loader):
     dataiter = iter(train_loader)
     data, target = dataiter.next()
@@ -54,6 +55,8 @@ def profile(model, device, train_loader):
     print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
 
 
+=======
+>>>>>>> 740d3ac392f7e5077fb1b3df4da989276ffd9525
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -162,6 +165,7 @@ def main():
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+<<<<<<< HEAD
 
     # profile model
     print("Start profiling...")
@@ -169,6 +173,8 @@ def main():
     print("Finished profiling.")
 
 
+=======
+>>>>>>> 740d3ac392f7e5077fb1b3df4da989276ffd9525
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)

@@ -102,4 +102,3 @@ cd ..
 python3 mnist_custom_linear_cuda.py
 ```
 
-
