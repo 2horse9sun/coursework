@@ -39,6 +39,19 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
+def profile(model, device, train_loader):
+    dataiter = iter(train_loader)
+    data, target = dataiter.next()
+    data, target = data.to(device), target.to(device)
+    # with torch.autograd.profiler.profile(use_cuda=True) as prof:
+    with torch.autograd.profiler.profile(use_cuda=False) as prof:
+        model(data[0].reshape(1,1,28,28))
+    print(prof)
+    # 打印出cpu使用时间前10名
+    print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
+
+
+
 class myLinearFunction(torch.autograd.Function):
     # Note that both forward and backward are @staticmethods
     @staticmethod
@@ -177,6 +190,12 @@ def main():
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+
+    # profile model
+    print("Start profiling...")
+    profile(model, device, train_loader)
+    print("Finished profiling.")
+
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
