@@ -1,0 +1,210 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <title>Stylish Portfolio - Start Bootstrap Template</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/css/stylish-portfolio.min.css" rel="stylesheet">
+
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/f2/3.3.8/f2-all.min.js"></script>
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/lib/jquery-3.2.1.min.js"></script>
+
+<script src="/qrcode.min.js"></script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.js"></script>
+    
+    <script type="text/javascript" src="js/move-top.js"></script>
+  <script type="text/javascript" src="js/easing.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+          $(".scroll").click(function(event){   
+            event.preventDefault();
+            $('html,body').animate({scrollTop:$(this.hash).offset().top},1000);
+          });
+        });
+    </script>
+<!--Calender-->
+    <link rel="stylesheet" href="/css/clndr.css" type="text/css" />
+    <script src="/js/underscore-min.js"></script>
+    <script src= "/js/moment-2.2.1.js"></script>
+    <script src="/js/clndr.js"></script>
+    <script src="/js/site.js"></script>
+<link href="/css/bootstrap.css" rel="stylesheet" type="text/css" media="all">
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="/js/jquery-1.11.0.min.js"></script>
+<!-- Custom Theme files -->
+<link href="/css/style.css" rel="stylesheet" type="text/css" media="all"/>
+	<style>
+	.login_box{
+		position: absolute;
+	    top: 50%;
+	    left: 50%;
+	    margin-left: -190px;
+	    margin-top: -270px;
+	    border-radius: 4px;
+	    -moz-border-radius: 4px;
+	    -webkit-border-radius: 4px;
+	    background-color: #fff;
+	    width: 380px;
+	    height: 540px;
+	    box-shadow: 0 2px 10px #999;
+	    -moz-box-shadow: #999 0 2px 10px;
+	    -webkit-box-shadow: #999 0 2px 10px;
+	}
+	.login {
+    display: none;
+    height: 100%;
+    min-width: 860px;
+    min-height: 700px;
+    overflow: auto;
+    position: relative;
+}
+	.bodybody{
+	    font-family: Helvetica Neue,Helvetica,Hiragino Sans GB,Microsoft YaHei,\\5FAE\8F6F\96C5\9ED1,Arial,sans-serif;
+    	background: url('/img/bg-callout.jpg') no-repeat 50%;
+    	background-size: cover;
+	}
+		    .inner{
+  position:absolute;
+  top: 90;left: 90;
+  font: bold 20px/1.5 '宋体';
+  height: 200px;
+  width: 200px;
+  
+  background:hsla(0,0%,100%,.8);
+}
+	</style>
+
+	</head>
+	<body class="bodybody">
+    <script>
+
+    </script>
+
+      <div class="col-md-4 first-one login_box">
+          <div class="first-one-inner" style="padding-bottom: 0px">
+             <h3 class="tittle">Sign in</h3>
+          <form>
+            <input id="account" type="text" class="text" placeholder="账户"  >
+            <input id="sercret"type="password" placeholder="密码" >
+            <div style="display: table; height: auto; padding-left:  80px">
+              
+                <a href="#" id="login" class="hvr-bounce-to-right button" style="margin-bottom: 5px">登陆</a>
+            
+           
+                <a href="#" id="resign" class="hvr-bounce-to-right button">注册</a>
+           <script>
+             $('#login').click(function(){
+                var account = $('#account').val()
+                var sercret = $('#sercret').val()
+                   $.ajax({
+                    url: "/loginsercret",
+                    type: "POST",
+                    datatype: "json",
+                    data: {
+                      account: account,
+                      sercret: sercret
+                  },
+                    success: function(data){
+                      if(data.key){
+                          var storge = window.localStorage;
+                      storge["account"] = account
+                      storge["flag"] = 1;
+                      tiaozhuan()
+                      }
+                      else{
+                        alert('账号密码不匹配')
+                      }
+                      
+                    }
+                  })
+               })
+             $('#resign').click(function(){
+                var account = $('#account').val()
+                var sercret = $('#sercret').val()
+                   $.ajax({
+                    url: "/resign",
+                    type: "POST",
+                    datatype: "json",
+                    data: {
+                      account: account,
+                      sercret: sercret
+                  },
+                    success: function(data){
+                      if(data.key){
+                        var storge = window.localStorage;
+                        storge["account"] = account
+                        storge["flag"] = 1;
+                        tiaozhuan()
+                      }
+                      else{
+                        alert('有账号了')
+                      }
+                      
+
+                    }
+                  })
+               })
+
+             function tiaozhuan(){
+
+
+      window.InterValObj; //timer变量，控制时间
+      window.count = 5; //间隔函数，1秒执行
+      window.curCount;//当前剩余秒数
+      $(document).ready(function(){
+          window.curCount = window.count;
+          var dealType; //验证方式
+          InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
+      }); 
+    
+    }      
+       
+        
+        
+        //timer处理函数
+  function SetRemainTime() {
+            if (curCount == 0) {
+                window.clearInterval(InterValObj);//停止计时器
+                window.storge = window.localStorage;
+                var url = "myspace?account=" + window.storge.getItem('account')
+                console.log(url)
+                location.href = url; 
+            }
+            else {
+                curCount--;
+                $("#ajaxresult").text("系统会在" + curCount +"秒后自动跳转首页！");
+            }
+        }
+           </script>
+               
+           
+            </div>
+           
+            <div class="clearfix"></div>
+            <div class="new">
+              <h3><a href="#">Forgot your password ?</a></h3>
+            </div>
+          </form>
+           </div>
+           <a href="/webwantkey" style="margin-top: 10px" class="hvr-bounce-to-bottom">Sign in with Wechat</a>
+            </div>
+        </div>
+    	
+	
+	</body>
+</html>

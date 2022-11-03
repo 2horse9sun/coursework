@@ -1,0 +1,745 @@
+ <section class="content-section bg-primary text-white text-center" >
+      <div class="container" >
+        <div class="content-section-heading" id="jieguo">
+          <h3 class="text-secondary mb-0" >处理结果</h3>
+          <h2 id="gotochart" class="mb-5">{{zhi}}</h2>
+          <div><button id="shoucang">收藏</button></div>
+          <script>
+            $("#shoucang").click(function () {
+          var zhi = '{{zhi}}';
+          var storge = window.localStorage
+          account = storge.getItem('account') || ''
+          if(account == ''){
+            location.href = '/loginpage';
+            return;
+          }
+          
+          $.ajax({
+              url: "/addsc",
+              type: "POST",
+              datatype: "json",
+              data: {
+                  zhi: zhi,
+                  account: account
+              },
+              success: function(data){
+                if(data.key==0){
+                  $('#shoucang').html('已收藏')
+                  $('#shoucang').attr('disabled',true)
+                }
+                
+              }
+            })
+        })
+          	$("#gotochart").click(function () {
+			    var zhi = $("#input1").val();
+			    $.ajax({
+              url: "/chart",
+              type: "POST",
+              datatype: "json",
+              data: {
+                  zhi: zhi
+              },
+              success: function(data){
+                console.log(data.list)
+                 $("#chartshow").html('<div style="height: auto; padding: 30px; padding-top: 100px;padding-bottom: 100px;"><div> <canvas style="margin-left: 20%" id="mountNode"></canvas><canvas style="margin-left: 20%"  id="mountNode1"></canvas></div><div style="margin-top: 100px" ><canvas style="margin-left: 20%"  id="mountNode2"></canvas><canvas id="mountNode3" style="margin-left: 20%" ></canvas></div></div>')
+               
+                 $("html,body").animate({scrollTop: $("#chartshow").offset().top}, 500);
+                 var data1 = [{
+    name: data.list[0].name,
+    percent: parseFloat(data.list[0].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[1].name,
+    percent: parseFloat(data.list[1].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[2].name,
+    percent: parseFloat(data.list[2].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[3].name,
+    percent: parseFloat(data.list[3].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[4].name,
+    percent: parseFloat(data.list[4].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[5].name,
+    percent: parseFloat(data.list[5].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[6].name,
+    percent: parseFloat(data.list[6].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[7].name,
+    percent: parseFloat(data.list[7].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[8].name,
+    percent: parseFloat(data.list[8].percent.toFixed(2)),
+    a: '1'
+  }, {
+    name: data.list[9].name,
+    percent: parseFloat(data.list[9].percent.toFixed(2)),
+    a: '1'
+  }];
+
+  var data2 = [{
+    item: $("#input1").val(),
+    user: data.list[0].name,
+    score: parseFloat(data.list[0].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[1].name,
+    score: parseFloat(data.list[1].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[2].name,
+    score: parseFloat(data.list[2].percent.toFixed(2)*100)
+  }, {
+   item: $("#input1").val(),
+    user: data.list[3].name,
+    score: parseFloat(data.list[3].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[4].name,
+    score: parseFloat(data.list[4].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[5].name,
+    score: parseFloat(data.list[5].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[6].name,
+    score: parseFloat(data.list[6].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[7].name,
+    score: parseFloat(data.list[7].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[8].name,
+    score: parseFloat(data.list[8].percent.toFixed(2)*100)
+  }, {
+    item: $("#input1").val(),
+    user: data.list[9].name,
+    score: parseFloat(data.list[9].percent.toFixed(2)*100)
+  }];
+  console.log(data1)
+               createchart(data1)
+               createchart1()
+               createchart2(data2)
+               createchart3()
+
+              },
+              fail: function(err){
+                alert('网络错误')
+              }
+  })
+  })
+          </script>
+            <script src="/js/swiper.min.js"></script>
+        </div>
+
+
+        {{#each new_img}}
+       
+          
+<div  style="margin: 50px;text-align: center;">
+
+        <div >
+  <h4 class="text-secondary">
+    <strong>相关热词:{{hot_word}}|{{word}}</strong>
+  </h4>
+   {{#if_eq new1 0}}
+  <a class="text-secondary mb-0" href="javascript:openNewWin('{{url1}}','{{new1}}')"><p class="text-faded mb-0">标题：{{new1}}</p></a>
+  {{/if_eq}}
+  {{#if_eq new2 0}}
+  <a class="text-secondary mb-0" href="javascript:openNewWin('{{url2}}','{{new2}}')"><p class="text-faded mb-0">标题：{{new2}}</p></a>
+  {{/if_eq}}
+{{#if_eq new3 0}}
+  <a class="text-secondary mb-0" href="javascript:openNewWin('{{url3}}','{{new3}}')"><p class="text-faded mb-0">标题：{{new3}}</p></a>{{/if_eq}}
+  </div>
+    </div>
+
+<div class="swiper-container"  id="aaa{{@index}}">
+    <div class="swiper-wrapper">
+     {{#if_eq img1 0}}
+      <div class="swiper-slide"  style="background-image:url({{img1}})"></div>
+      {{/if_eq}}
+{{#if_eq img2 0}}
+      <div class="swiper-slide"  style="background-image:url({{img2}})"></div>
+      {{/if_eq}}
+      {{#if_eq img3 0}}
+      <div class="swiper-slide"  style="background-image:url({{img3}})"></div>
+      {{/if_eq}}
+      {{#if_eq img4 0}}
+      <div class="swiper-slide"  style="background-image:url({{img4}})"></div>
+      {{/if_eq}}
+    </div>
+    <!-- Add Pagination -->
+    <div class="swiper-pagination"></div>
+  </div>
+
+  <!-- Swiper JS -->
+<script src="/js/swiper.min.js"></script>
+<script>
+    var swiper = new Swiper('#aaa{{@index}}', {
+      autoplay:{
+        delay: 1000
+      },
+      effect: 'coverflow',
+      grabCursor: true,
+      centeredSlides: true,
+      slidesPerView: 'auto',
+      coverflowEffect: {
+        rotate: 50,
+        stretch: 0,
+        depth: 100,
+        modifier: 1,
+        slideShadows : true,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+      },
+    });
+  </script>
+  <!-- Initialize Swiper -->
+
+  </div>
+
+
+        </div>{{/each}}
+        <div hidden="true">
+  <div style="display: table; padding-left: 50px">
+  <div style="display: table-cell;height: 200px"><img onerror="imgerrorfun();" style="height: 200px; width: auto" src="http://127.0.0.1:3000/getimg?url={{img1}}" /></div>
+  <div style="display: table-cell;height: 200px"><img onerror="imgerrorfun();" style="height: 200px; width: auto" src="http://127.0.0.1:3000/getimg?url={{img2}}" /></div>
+  <div style="display: table-cell;height: 200px"> <img onerror="imgerrorfun();" style="height: 200px; width: auto" src="http://127.0.0.1:3000/getimg?url={{img3}}" /></div>
+  <div style="display: table-cell;height: 200px"> <img onerror="imgerrorfun();" style="height: 200px; width: auto" src="http://127.0.0.1:3000/getimg?url={{img4}}" /></div>
+ </div>
+ <script type="text/javascript"> 
+     function imgerrorfun(){ 
+         var img=event.srcElement; 
+         img.src="/img1/pornhub.png"; 
+         img.onerror=null;
+     } 
+</script> 
+        <script>
+
+function openNewWin(url,title)
+{
+    var storge = window.localStorage
+    if(storge.getItem('account')){
+      $.ajax({
+              url: "/addnew",
+              type: "POST",
+              datatype: "json",
+              data: {
+                  account: storge.getItem('account'),
+                  url: url,
+                  title: title
+              },
+              success(data){
+
+              }
+            })
+    }
+    
+    window.open(url, title, "location=no,status=no,scrollvars=no");
+}
+        </script>
+      </div>  
+<script>
+  function moveimg(this){
+    console.log(this)
+  }
+</script>
+  </section>  
+<section style="height: auto" id="chartshow">
+
+</section>
+<section style="height:auto;width: auto">
+  <iframe hidden="true" id="mainIframe" style="width:1000px;height:800px;border:1px blue solid;" name="mainIframe" src="http://www.baidu.com" frameborder="0" scrolling="auto" ></iframe>
+    <style>
+   
+</style>
+<script>
+function createchart(data){
+           var chart = new F2.Chart({
+          id: 'mountNode',
+          pixelRatio: window.devicePixelRatio
+        });
+        chart.source(data, {
+          percent: {
+            formatter: function formatter(val) {
+              return val * 100 + '%';
+            }
+          }
+        });
+        chart.legend({
+          position: 'right',
+          itemFormatter: function itemFormatter(val) {
+            return val;
+          }
+        });
+        chart.tooltip(false);
+        chart.coord('polar', {
+          transposed: true,
+          radius: 0.85
+        });
+        chart.axis(false);
+        chart.interval().position('a*percent').color('name', ['#1890FF', '#13C2C2', '#2FC25B', '#FACC14', '#F04864', '#8543E0']).adjust('stack').style({
+          lineWidth: 1,
+          stroke: '#fff',
+          lineJoin: 'round',
+          lineCap: 'round'
+        }).animate({
+          appear: {
+            duration: 1200,
+            easing: 'bounceOut'
+          }
+        });
+
+        chart.render();
+}
+ 
+ 
+
+</script>
+
+<script>
+
+function createchart1(){
+   var data = [{
+    date: "2017-06-05",
+    value: 116
+  }, {
+    date: "2017-06-06",
+    value: 129
+  }, {
+    date: "2017-06-07",
+    value: 135
+  }, {
+    date: "2017-06-08",
+    value: 86
+  }, {
+    date: "2017-06-09",
+    value: 73
+  }, {
+    date: "2017-06-10",
+    value: 85
+  }, {
+    date: "2017-06-11",
+    value: 73
+  }, {
+    date: "2017-06-12",
+    value: 68
+  }, {
+    date: "2017-06-13",
+    value: 92
+  }, {
+    date: "2017-06-14",
+    value: 130
+  }, {
+    date: "2017-06-15",
+    value: 245
+  }, {
+    date: "2017-06-16",
+    value: 139
+  }, {
+    date: "2017-06-17",
+    value: 115
+  }, {
+    date: "2017-06-18",
+    value: 111
+  }, {
+    date: "2017-06-19",
+    value: 309
+  }, {
+    date: "2017-06-20",
+    value: 206
+  }, {
+    date: "2017-06-21",
+    value: 137
+  }, {
+    date: "2017-06-22",
+    value: 128
+  }, {
+    date: "2017-06-23",
+    value: 85
+  }, {
+    date: "2017-06-24",
+    value: 94
+  }, {
+    date: "2017-06-25",
+    value: 71
+  }, {
+    date: "2017-06-26",
+    value: 106
+  }, {
+    date: "2017-06-27",
+    value: 84
+  }, {
+    date: "2017-06-28",
+    value: 93
+  }, {
+    date: "2017-06-29",
+    value: 85
+  }, {
+    date: "2017-06-30",
+    value: 73
+  }, {
+    date: "2017-07-01",
+    value: 83
+  }, {
+    date: "2017-07-02",
+    value: 125
+  }, {
+    date: "2017-07-03",
+    value: 107
+  }, {
+    date: "2017-07-04",
+    value: 82
+  }, {
+    date: "2017-07-05",
+    value: 44
+  }, {
+    date: "2017-07-06",
+    value: 72
+  }, {
+    date: "2017-07-07",
+    value: 106
+  }, {
+    date: "2017-07-08",
+    value: 107
+  }, {
+    date: "2017-07-09",
+    value: 66
+  }, {
+    date: "2017-07-10",
+    value: 91
+  }, {
+    date: "2017-07-11",
+    value: 92
+  }, {
+    date: "2017-07-12",
+    value: 113
+  }, {
+    date: "2017-07-13",
+    value: 107
+  }, {
+    date: "2017-07-14",
+    value: 131
+  }, {
+    date: "2017-07-15",
+    value: 111
+  }, {
+    date: "2017-07-16",
+    value: 64
+  }, {
+    date: "2017-07-17",
+    value: 69
+  }, {
+    date: "2017-07-18",
+    value: 88
+  }, {
+    date: "2017-07-19",
+    value: 77
+  }, {
+    date: "2017-07-20",
+    value: 83
+  }, {
+    date: "2017-07-21",
+    value: 111
+  }, {
+    date: "2017-07-22",
+    value: 57
+  }, {
+    date: "2017-07-23",
+    value: 55
+  }, {
+    date: "2017-07-24",
+    value: 60
+  }];
+  var chart = new F2.Chart({
+    id: 'mountNode1',
+    pixelRatio: window.devicePixelRatio
+  });
+
+  chart.source(data, {
+    value: {
+      tickCount: 5,
+      min: 0
+    },
+    date: {
+      type: 'timeCat',
+      range: [0, 1],
+      tickCount: 3
+    }
+  });
+  chart.tooltip({
+    custom: true,
+    showXTip: true,
+    showYTip: true,
+    snap: true,
+    crosshairsType: 'xy',
+    crosshairsStyle: {
+      lineDash: [2]
+    }
+  });
+  chart.axis('date', {
+    label: function label(text, index, total) {
+      var textCfg = {};
+      if (index === 0) {
+        textCfg.textAlign = 'left';
+      } else if (index === total - 1) {
+        textCfg.textAlign = 'right';
+      }
+      return textCfg;
+    }
+  });
+  chart.line().position('date*value');
+  chart.render();
+}
+</script>
+<script>
+
+function createchart2(data){
+  var data = [{
+    item: 'Design',
+    user: '用户 A',
+    score: 70
+  }, {
+    item: 'Design',
+    user: '用户 B',
+    score: 30
+  }, {
+    item: 'Development',
+    user: '用户 A',
+    score: 60
+  }, {
+    item: 'Development',
+    user: '用户 B',
+    score: 70
+  }, {
+    item: 'Marketing',
+    user: '用户 A',
+    score: 50
+  }, {
+    item: 'Marketing',
+    user: '用户 B',
+    score: 60
+  }, {
+    item: 'Users',
+    user: '用户 A',
+    score: 40
+  }, {
+    item: 'Users',
+    user: '用户 B',
+    score: 50
+  }, {
+    item: 'Test',
+    user: '用户 A',
+    score: 60
+  }, {
+    item: 'Test',
+    user: '用户 B',
+    score: 70
+  }, {
+    item: 'Language',
+    user: '用户 A',
+    score: 70
+  }, {
+    item: 'Language',
+    user: '用户 B',
+    score: 50
+  }, {
+    item: 'Technology',
+    user: '用户 A',
+    score: 70
+  }, {
+    item: 'Technology',
+    user: '用户 B',
+    score: 40
+  }, {
+    item: 'Support',
+    user: '用户 A',
+    score: 60
+  }, {
+    item: 'Support',
+    user: '用户 B',
+    score: 40
+  }];
+  var chart = new F2.Chart({
+    id: 'mountNode2',
+    pixelRatio: window.devicePixelRatio
+  });
+
+  chart.coord('polar');
+  chart.source(data, {
+    score: {
+      min: 0,
+      max: 120,
+      nice: false,
+      tickCount: 4
+    }
+  });
+  chart.tooltip({
+    custom: true, // 自定义 tooltip 内容框
+    onChange: function onChange(obj) {
+      var legend = chart.get('legendController').legends.top[0];
+      var tooltipItems = obj.items;
+      var legendItems = legend.items;
+      var map = {};
+      legendItems.map(function(item) {
+        map[item.name] = _.clone(item);
+      });
+      tooltipItems.map(function(item) {
+        var name = item.name;
+        var value = item.value;
+        if (map[name]) {
+          map[name].value = value;
+        }
+      });
+      legend.setItems(_.values(map));
+    },
+    onHide: function onHide() {
+      var legend = chart.get('legendController').legends.top[0];
+      legend.setItems(chart.getLegendItems().country);
+    }
+  });
+  chart.axis('score', {
+    label: function label(text, index, total) {
+      if (index === total - 1) {
+        return null;
+      }
+      return {
+        top: true
+      };
+    },
+    grid: {
+      lineDash: null,
+      type: 'arc' // 弧线网格
+    }
+  });
+  chart.axis('item', {
+    grid: {
+      lineDash: null
+    }
+  });
+  chart.line().position('item*score').color('user');
+  chart.point().position('item*score').color('user').style({
+    stroke: '#fff',
+    lineWidth: 1
+  });
+  chart.render();
+}
+</script>
+<script>
+
+function createchart3(){
+  var data = [{
+    name: 'London',
+    月份: 'Jan.',
+    月均降雨量: 18.9
+  }, {
+    name: 'London',
+    月份: 'Feb.',
+    月均降雨量: 28.8
+  }, {
+    name: 'London',
+    月份: 'Mar.',
+    月均降雨量: 39.3
+  }, {
+    name: 'London',
+    月份: 'Apr.',
+    月均降雨量: 81.4
+  }, {
+    name: 'London',
+    月份: 'May.',
+    月均降雨量: 47
+  }, {
+    name: 'London',
+    月份: 'Jun.',
+    月均降雨量: 20.3
+  }, {
+    name: 'London',
+    月份: 'Jul.',
+    月均降雨量: 24
+  }, {
+    name: 'London',
+    月份: 'Aug.',
+    月均降雨量: 35.6
+  }, {
+    name: 'Berlin',
+    月份: 'Jan.',
+    月均降雨量: 12.4
+  }, {
+    name: 'Berlin',
+    月份: 'Feb.',
+    月均降雨量: 23.2
+  }, {
+    name: 'Berlin',
+    月份: 'Mar.',
+    月均降雨量: 34.5
+  }, {
+    name: 'Berlin',
+    月份: 'Apr.',
+    月均降雨量: 99.7
+  }, {
+    name: 'Berlin',
+    月份: 'May.',
+    月均降雨量: 52.6
+  }, {
+    name: 'Berlin',
+    月份: 'Jun.',
+    月均降雨量: 35.5
+  }, {
+    name: 'Berlin',
+    月份: 'Jul.',
+    月均降雨量: 37.4
+  }, {
+    name: 'Berlin',
+    月份: 'Aug.',
+    月均降雨量: 42.4
+  }];
+  var chart = new F2.Chart({
+    id: 'mountNode3',
+    pixelRatio: window.devicePixelRatio
+  });
+  chart.source(data, {
+    '月均降雨量': {
+      tickCount: 5
+    }
+  });
+  chart.tooltip({
+    custom: true, // 自定义 tooltip 内容框
+    onChange: function onChange(obj) {
+      var legend = chart.get('legendController').legends.top[0];
+      var tooltipItems = obj.items;
+      var legendItems = legend.items;
+      var map = {};
+      legendItems.map(function(item) {
+        map[item.name] = _.clone(item);
+      });
+      tooltipItems.map(function(item) {
+        var name = item.name;
+        var value = item.value;
+        if (map[name]) {
+          map[name].value = value;
+        }
+      });
+      legend.setItems(_.values(map));
+    },
+    onHide: function onHide() {
+      var legend = chart.get('legendController').legends.top[0];
+      legend.setItems(chart.getLegendItems().country);
+    }
+  });
+  chart.interval().position('月份*月均降雨量').color('name').adjust('stack');
+  chart.render();
+}
+</script>

@@ -1,0 +1,17 @@
+{
+  "web": {
+    "port": "8889"
+  },
+  
+ "mysql": {
+    "host": "127.0.0.1",
+    "user": "root",
+    "password": "1058888R",
+    "port": "3306",
+    "database": "mt"
+  },
+  "App": {
+    "AppID":"wx3da5445de748579e",
+    "AppSecret":"63ec9a12c928611a642144aa5a615fc1"
+  }
+}

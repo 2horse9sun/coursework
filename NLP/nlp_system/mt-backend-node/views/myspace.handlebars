@@ -1,0 +1,189 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <title>Stylish Portfolio - Start Bootstrap Template</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/css/stylish-portfolio.min.css" rel="stylesheet">
+
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/f2/3.3.8/f2-all.min.js"></script>
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/lib/jquery-3.2.1.min.js"></script>
+
+<script src="/qrcode.min.js"></script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.js"></script>
+
+
+	<style>
+	.login_box{
+		position: absolute;
+	    top: 50%;
+	    left: 50%;
+	    margin-left: -100px;
+	    margin-top: -100px;
+	    border-radius: 4px;
+	    -moz-border-radius: 4px;
+	    -webkit-border-radius: 4px;
+	    background-color: #fff;
+	    width: 200px;
+	    height: 200px;
+	    box-shadow: 0 2px 10px #999;
+	    -moz-box-shadow: #999 0 2px 10px;
+	    -webkit-box-shadow: #999 0 2px 10px;
+	}
+	.login {
+    display: none;
+    height: 100%;
+    min-width: 860px;
+    min-height: 700px;
+    overflow: auto;
+    position: relative;
+}
+	.bodybody{
+	    font-family: Helvetica Neue,Helvetica,Hiragino Sans GB,Microsoft YaHei,\\5FAE\8F6F\96C5\9ED1,Arial,sans-serif;
+    	background: url('/img/bg-callout.jpg') no-repeat 50%;
+    	background-size: cover;
+	}
+		    .inner{
+  position:absolute;
+  top: 90;left: 90;
+  font: bold 20px/1.5 '宋体';
+  height: 200px;
+  width: 200px;
+  
+  background:hsla(0,0%,100%,.8);
+}
+	</style>
+
+	</head>
+	<body class="">
+    <script>
+        // checkflag()
+        // function checkflag(){
+        //    var storge = window.localStorage;
+        //    var flag = storge.getItem('flag')
+        //    var account = storge.getItem('account')
+        //    if(flag == 1){
+        //        $.ajax({
+        //       url: "/getuserinfo",
+        //       type: "POST",
+        //       datatype: "json",
+        //       data: {
+        //           account: account
+        //       },
+        //       success: function(data){
+
+        //           $('#').html()
+        //       }
+        //     )}
+        //       }
+           
+        //    else{
+        //     alert('未登陆')
+        //       location.href = 'loginpage'
+        //    }
+        // }
+    </script>
+		
+  <div  id="tou" class="masthead d-flex" style="height: 70%"> 
+      <div class="login_box">
+        <img style="width: 200px;height: 200px" src="/images/snow.png">
+      <div id="zhezhao"></div>
+      <div id="qrcodediv" style="padding: 90px" ></div>   
+            <div style="padding-left: 115px"><button id="getqrcode_again" class="btn btn-primary js-scroll-trigger" style="width: 150px; height: 40px" hidden="true">重新获取</button>  </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <section  style="height: 30%; padding: 30px" class=" bg-primary text-white" id="action">
+      <div class=" text-center">
+        <h2 class="mb-4">{{account}}，欢迎你</h2>
+        <a href="#" class="btn btn-xl btn-light mr-4">最近搜索</a>
+        <a href="#" class="btn btn-xl btn-dark">数据分析</a>
+      </div>
+    </section>
+
+  
+<section class="content-section" id="portfolio">
+      <div class="container">
+        <div class="content-section-heading text-center">
+          <h3 class="text-secondary mb-0">Portfolio</h3>
+          <h2 class="mb-5">Recent Projects</h2>
+        </div>
+        <div class="row no-gutters">
+          <div class="col-lg-6">
+            <a class="portfolio-item" href="#">
+              <span class="caption">
+                <span class="caption-content">
+                  <h2>Stationary</h2>
+                  <p class="mb-0">A yellow pencil with envelopes on a clean, blue backdrop!</p>
+                </span>
+              </span>
+              <img class="img-fluid" src="/images/portfolio-1.jpg" alt="">
+            </a>
+          </div>
+          <div class="col-lg-6">
+            <a class="portfolio-item" href="#">
+              <span class="caption">
+                <span class="caption-content">
+                  <h2>Ice Cream</h2>
+                  <p class="mb-0">A dark blue background with a colored pencil, a clip, and a tiny ice cream cone!</p>
+                </span>
+              </span>
+              <img class="img-fluid" src="/images/portfolio-2.jpg" alt="">
+            </a>
+          </div>
+          <div class="col-lg-6">
+            <a class="portfolio-item" href="#">
+              <span class="caption">
+                <span class="caption-content">
+                  <h2>Strawberries</h2>
+                  <p class="mb-0">Strawberries are such a tasty snack, especially with a little sugar on top!</p>
+                </span>
+              </span>
+              <img class="img-fluid" src="/images/portfolio-3.jpg" alt="">
+            </a>
+          </div>
+          <div class="col-lg-6">
+            <a class="portfolio-item" href="#">
+              <span class="caption">
+                <span class="caption-content">
+                  <h2>Workspace</h2>
+                  <p class="mb-0">A yellow workspace with some scissors, pencils, and other objects.</p>
+                </span>
+              </span>
+              <img class="img-fluid" src="/images/portfolio-4.jpg" alt="">
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Callout -->
+    <section class="callout">
+      <div class="container text-center">
+        <h2 class="mx-auto mb-5">
+        <div><a class="btn btn-primary btn-xl" href="#">working</a></div>
+      </div>
+
+    </section>
+
+          </script>
+	</body>
+</html>

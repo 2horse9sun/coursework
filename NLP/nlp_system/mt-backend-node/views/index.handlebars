@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <title>Stylish Portfolio - Start Bootstrap Template</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/css/stylish-portfolio.min.css" rel="stylesheet">
+
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/f2/3.3.8/f2-all.min.js"></script>
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/lib/jquery-3.2.1.min.js"></script>
+
+<script src="/qrcode.min.js"></script>
+<script src="/js/swiper.min.js"></script>
+<link rel="stylesheet" href="/css/swiper.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.js"></script>
+     
+       <style>
+            .swiper-container{
+      width: 100%;
+      padding-top: 50px;
+      padding-bottom: 50px;
+    }
+    .swiper-slide {
+      background-position: center;
+      background-size: cover;
+      width: 300px;
+      height: 300px;
+
+    }
+    
+        .box{
+    width:300px;
+    height:150px;
+    background: deepskyblue;
+    font:30px/150px 'Microsoft YaHei';
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    margin:100px auto;
+    /*边框阴影*/
+    /*效果1*/
+    box-shadow: inset 5px 5px 20px #ccc;
+ 
+}
+.circleImg{
+  border-radius: 30px;
+  width:60px;
+  height:60px;
+}
+.box1 {
+                position: relative;
+                width: 250px;
+                height: 150px;
+                border: 1px solid #efefef;
+                margin: 100px auto;
+                background: #fff;
+                -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+                -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+            }
+            
+            .box1:before,
+            .box1:after {
+                content: '';
+                z-index: -1;
+                position: absolute;
+                left: 10px;
+                bottom: 10px;
+                width: 70%;
+                max-width: 300px;
+                /* avoid rotation causing ugly appearance at large container widths */
+                max-height: 150px;
+                height: 55%;
+                -webkit-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+                -moz-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+                -webkit-transform: skew(-15deg) rotate(-6deg);
+                -moz-transform: skew(-15deg) rotate(-6deg);
+                -ms-transform: skew(-15deg) rotate(-6deg);
+                -o-transform: skew(-15deg) rotate(-6deg);
+                transform: skew(-15deg) rotate(-6deg);
+            }
+            
+            .box1:after {
+                left: auto;
+                right: 10px;
+                -webkit-transform: skew(15deg) rotate(6deg);
+                -moz-transform: skew(15deg) rotate(6deg);
+                -ms-transform: skew(15deg) rotate(6deg);
+                -o-transform: skew(15deg) rotate(6deg);
+                transform: skew(15deg) rotate(6deg);
+            }
+      </style>
+  </head>
+
+<body>
+<script>
+  
+</script>
+
+
+
+
+    <!-- Navigation -->
+    <a class="menu-toggle rounded" href="#">
+      <i class="fa fa-bars"></i>
+    </a>
+    <nav id="sidebar-wrapper">
+      <ul class="sidebar-nav">
+        <li class="sidebar-brand">
+          <div>
+          <a class="js-scroll-trigger" style="float: left; " href="#tou">风雪楼</a>
+          <img src="./图层 1.png" style="width: 60px; height: 60px; float: left; position: relative; left: 10px; top: -10px; ">
+            
+          <img id="touxiang" hidden="true" class="circleImg" src=""  />
+          </div>
+
+          <script>
+            var storge = window.localStorage
+            if(storge.getItem('avatarUrl')){
+              $("#touxiang").prop("hidden",false); 
+              $('#touxiang').attr(
+                'src',
+                storge.getItem('avatarUrl')
+              );
+            }
+            if(storge.getItem('account')){
+              $('#gotomy').html('个人中心(已登陆)')
+            }else{
+              $('#gotomy').html('个人中心(未登陆)')
+            }
+            
+          </script>
+
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="js-scroll-trigger" href="#tou">搜索</a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="js-scroll-trigger" href="#nicenews">近期热点</a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="js-scroll-trigger" href="#services">数据总结</a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="js-scroll-trigger" id="gotomy">个人中心</a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="js-scroll-trigger" href="/webwantkey">微信登陆</a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="js-scroll-trigger" href="/loginpage">登陆</a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="js-scroll-trigger" id="loginout">登出</a>
+        </li>
+        
+        <script>
+          $('#loginout').click(function (){
+            var storge = window.localStorage
+            storge.clear()
+            $("#touxiang").prop("hidden",true); 
+            window.location.reload()
+          })
+          $('#gotomy').click(function (){
+            var storge = window.localStorage
+            var account = storge.getItem('account') || ''
+            if(account == ''){
+              location.href = '/loginpage'
+            }
+            else{
+              location.href = '/myspace?account=' + account
+            }
+          })
+        </script>
+      </ul>
+    </nav>
+
+    <!-- Header -->
+ <!-- Header -->
+    <div  id="tou" class="masthead d-flex" style="height: 100%; min-height:  800px">
+      
+      <div style="position: relative; left: 50px;top: -90px"><img src="/hualiao.png" style="width: 200px;height: 120px" alt=""></div>
+      <div class="overlay"> <script type="text/javascript" src="/tagcloud.js"></script>
+  <style type="text/css">
+    .fl{ float: left; }
+    .fr{ float: right; }
+    .wrapper{ width: 1300px; height: 300px; margin-top: 200px;  }
+    .wrapper p{ padding-top: 200px; line-height: 27px; color: #999; font-size: 14px; text-align: center;  margin-top:  auto}
+    .tagcloud {  }
+    .tagcloud a{ position: absolute;  top: 0; left: 0;  display: block; padding: 11px 30px; color: #333; font-size: 16px; border: 1px solid #e6e7e8; border-radius: 18px; background-color: #f2f4f8; text-decoration: none; white-space: nowrap;
+      -o-box-shadow: 6px 4px 8px 0 rgba(151,142,136,.34);
+      -ms-box-shadow: 6px 4px 8px 0 rgba(151,142,136,.34);
+      -moz-box-shadow: 6px 4px 8px 0 rgba(151,142,136,.34);
+      -webkit-box-shadow: 6px 4px 8px 0 rgba(151,142,136,.34);
+      box-shadow: 6px 4px 8px 0 rgba(151,142,136,.34);
+      -ms-filter:"progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135, Color='#000000')";/*兼容ie7/8*/
+      filter: progid:DXImageTransform.Microsoft.Shadow(color='#969696', Direction=125, Strength=9);
+      /*strength是阴影大小，direction是阴影方位，单位为度，可以为负数，color是阴影颜色 （尽量使用数字）使用IE滤镜实现盒子阴影的盒子必须是行元素或以行元素显示（block或inline-block;）*/
+    }
+    .tagcloud a:hover{ color: #3385cf; }
+  </style>
+
+<style type="text/css">
+    
+
+    .disinline{
+      display: inline;
+    }
+    .margin0{
+      margin: 0;
+    }
+  </style>
+  
+<div class="wrapper" style="display: table; left: 50%; position: absolute; margin-left: -650px">
+   
+    <div id="leftcloud" class="tagcloud " style="display: table-cell;" >
+      {{#each leftword}}
+      <a  id="leftcloudword{{id}}">{{word}}</a>
+      {{/each}}
+      <a  id="leftcloudword111">大众汽车</a>
+      <a  id="leftcloudword222">彭博社</a>
+      <a  id="leftcloudword333">霍芬</a>
+      <script>
+          $('#leftcloudword111').click(function(){
+            $("#input1").attr("value",'大众汽车');
+          })
+      </script><script>
+          $('#leftcloudword222').click(function(){
+            $("#input1").attr("value",'彭博社');
+          })
+      </script><script>
+          $('#leftcloudword333').click(function(){
+            $("#input1").attr("value",'霍芬');
+          })
+      </script>
+        {{#each leftword}}
+        <script>
+          $('#leftcloudword{{id}}').click(function(){
+            $("#input1").attr("value",'{{word}}');
+          })
+      </script>
+      {{/each}}
+      
+    </div>
+
+    <div class="container text-center my-auto" style="width: 300px; display: table-cell; top: -100px; position: relative;">
+     <img class="img-fluid" src="./图层 1.png" alt="" style="width: 200px">       <h3 class="mb-5">
+          <em></em>
+        </h3>
+        <input id="input1" style="-moz-border-radius: 10px; -webkit-border-radius: 10px;   border-radius: 10px; height: 40px;width: 200px; border: ">
+        <style>
+           .button1 {  
+        width: 140px;  
+        padding: auto;  
+        background-color: #428bca;  
+        border-color: #357ebd;  
+        color: #fff;  
+        -moz-border-radius: 10px;  
+        -webkit-border-radius: 10px;  
+        border-radius: 10px; /* future proofing */  
+        -khtml-border-radius: 10px; /* for old Konqueror browsers */  
+        text-align: center;  
+        vertical-align: middle;  
+        border: 1px solid transparent;  
+        font-weight: 900;  
+        font-size:125%  
+      } 
+        </style>
+        <button class="button1" id="sousuo" style="height: 40px; padding: auto; margin: 20px ;"  type="button">搜索热词</button> 
+        <div style="margin: 10px; text-align: center; color: white"><h5 class="mb-4">目前收录热词{{wordlen}}个</h2></div>
+      </div>
+    <div id="rightcloud" class="tagcloud" style="display: table-cell;" >
+      {{#each rightword}}
+      <a  id="rightcloudword{{id}}">{{word}}</a>
+      {{/each}}
+      
+        {{#each rightword}}
+        <script>
+          $('#rightcloudword{{id}}').click(function(){
+            $("#input1").attr("value",'{{word}}');
+          })
+      </script>
+      {{/each}}
+    </div>
+</div><!--wrapper-->
+
+<script type="text/javascript">
+    /*3D标签云*/
+    tagcloud({
+        selector: ".tagcloud",  //元素选择器
+        fontsize: 16,       //基本字体大小, 单位px
+        radius: 100,         //滚动半径, 单位px
+        mspeed: "normal",   //滚动最大速度, 取值: slow, normal(默认), fast
+        ispeed: "normal",   //滚动初速度, 取值: slow, normal(默认), fast
+        direction: 135,     //初始滚动方向, 取值角度(顺时针360): 0对应top, 90对应left, 135对应right-bottom(默认)...
+        keep: false          //鼠标移出组件后是否继续随鼠标滚动, 取值: false, true(默认) 对应 减速至初速度滚动, 随鼠标滚动
+    });
+</script>
+   </div>
+    </div>
+
+
+<script>
+  $("#sousuo").click(function () {
+    var zhi = $("#input1").val();
+    var storge = window.localStorage
+    var account = storge.getItem('account') || ''
+    if(zhi == ''){
+      alert('请填写值')
+      return;
+    }
+    $.ajax({
+              url: "/sousuo",
+              type: "get",
+              datatype: "json",
+              data: {
+                  zhi: zhi,
+                  account: account
+              },
+              success: function(data){
+                if(data.key == 0) {
+                  alert('暂时没有收录该热词')
+                }
+                else{
+                    $("#services").html(data)
+               
+                    $("html,body").animate({scrollTop: $("#jieguo").offset().top}, 500);
+                    console.log(data)
+                }
+               
+              },
+              fail: function(err){
+                alert('网络错误')
+              }
+  })
+  })
+</script>
+
+  
+    <!-- Services -->
+    <div id="services">
+   
+    </div>
+ 
+        <section class="content-section bg-primary text-white text-center" id="services">
+      <div class="container">
+        <div class="content-section-heading">
+          <h3 class="text-secondary mb-0">what can we do</h3>
+          <h2 class="mb-5">数据分析</h2>
+        </div>
+        <div class="" style="">
+          <div style=" display: table;left: 50%; margin-left: -480px ;margin-bottom: 10px;position: relative; ">
+          <div style=" padding-left: 0px;padding-top: 55px;border-radius: 12px;display: table-cell; width: 480px;height: 260px; margin: 10px" class="bg-white box1" >
+             <canvas id="chart1"></canvas>
+          </div>
+          <div style="padding-left: 0px;padding-top: 55px;border-radius: 12px;display: table-cell;width: 480px;height: 260px; margin: 10px" class="bg-white box1" >
+            <canvas id="chart2"></canvas>
+          </div>
+          </div>
+          <div style=" display: table;left: 50%; margin-left: -480px ;position: relative; ">
+          <div style="padding-left: 0px;padding-top: 55px;border-radius: 12px;display: table-cell; width: 480px;height: 260px; margin: 10px" class=" bg-white box1"  >
+            <canvas id="chart3"></canvas>
+          </div>
+          <div  style="padding-left: 0px;padding-top: 55px;border-radius: 12px;display: table-cell; width: 480px;height: 260px;margin: 10px" class="bg-white box1" >
+           <canvas id="chart4"></canvas>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+<script>  
+
+
+
+   var data = [{
+    date: "2019-06-26",
+    value: 0
+  }, {
+    date: "2019-06-27",
+    value: 3486
+  }, {
+    date: "2019-06-28",
+    value: 16482
+  }, {
+    date: "2019-06-29",
+    value: 32664
+  }, {
+    date: "2019-06-30",
+    value: 35348
+  }, {
+    date: "2019-07-01",
+    value: 53971
+  }, {
+    date: "2019-07-02",
+    value: 116583
+  }, {
+    date: "2019-07-03",
+    value: 129115
+  }, {
+    date: "2019-07-04",
+    value: 126036
+  }, {
+    date: "2019-07-05",
+    value: 126036
+  }];
+  var chart = new F2.Chart({
+    id: 'chart2',
+    pixelRatio: window.devicePixelRatio
+  });
+
+  chart.source(data, {
+    value: {
+      tickCount: 5,
+      min: 0
+    },
+    date: {
+      type: 'timeCat',
+      range: [0, 1],
+      tickCount: 3
+    }
+  });
+  chart.tooltip({
+    custom: true,
+    showXTip: true,
+    showYTip: true,
+    snap: true,
+    crosshairsType: 'xy',
+    crosshairsStyle: {
+      lineDash: [2]
+    }
+  });
+  chart.axis('date', {
+    label: function label(text, index, total) {
+      var textCfg = {};
+      if (index === 0) {
+        textCfg.textAlign = 'left';
+      } else if (index === total - 1) {
+        textCfg.textAlign = 'right';
+      }
+      return textCfg;
+    }
+  });
+  chart.line().position('date*value');
+  chart.render();
+
+
+  var data = [{
+    item: '大众汽车',
+    user: '用户',
+    score: 70
+  }, {
+    item: '彭博社',
+    user: '用户',
+    score: 30
+  }, {
+    item: '5G',
+    user: '用户',
+    score: 60
+  }, {
+    item: '互联网',
+    user: '用户',
+    score: 70
+  }, {
+    item: 'AI',
+    user: '用户',
+    score: 50
+  }, {
+    item: '百度',
+    user: '用户',
+    score: 60
+  }, {
+    item: '李宏毅',
+    user: '用户',
+    score: 40
+  }, {
+    item: '高温',
+    user: '用户',
+    score: 50
+  }];
+  var chart = new F2.Chart({
+    id: 'chart3',
+    pixelRatio: window.devicePixelRatio
+  });
+
+  chart.coord('polar');
+  chart.source(data, {
+    score: {
+      min: 0,
+      max: 120,
+      nice: false,
+      tickCount: 4
+    }
+  });
+  chart.tooltip({
+    custom: true, // 自定义 tooltip 内容框
+    onChange: function onChange(obj) {
+      var legend = chart.get('legendController').legends.top[0];
+      var tooltipItems = obj.items;
+      var legendItems = legend.items;
+      var map = {};
+      legendItems.map(function(item) {
+        map[item.name] = _.clone(item);
+      });
+      tooltipItems.map(function(item) {
+        var name = item.name;
+        var value = item.value;
+        if (map[name]) {
+          map[name].value = value;
+        }
+      });
+      legend.setItems(_.values(map));
+    },
+    onHide: function onHide() {
+      var legend = chart.get('legendController').legends.top[0];
+      legend.setItems(chart.getLegendItems().country);
+    }
+  });
+  chart.axis('score', {
+    label: function label(text, index, total) {
+      if (index === total - 1) {
+        return null;
+      }
+      return {
+        top: true
+      };
+    },
+    grid: {
+      lineDash: null,
+      type: 'arc' // 弧线网格
+    }
+  });
+  chart.axis('item', {
+    grid: {
+      lineDash: null
+    }
+  });
+  chart.line().position('item*score').color('user');
+  chart.point().position('item*score').color('user').style({
+    stroke: '#fff',
+    lineWidth: 1
+  });
+  chart.render();
+
+
+  var data = [{
+    name: '手机',
+    月份: '华为',
+    月均降雨量: 20961
+  }, {
+    name: '手机',
+    月份: '苹果',
+    月均降雨量: 8157
+  }, {
+    name: '手机',
+    月份: '小米',
+    月均降雨量: 7132
+  }, {
+    name: '手机',
+    月份: '三星',
+    月均降雨量: 4648
+  }, {
+    name: '手机',
+    月份: 'OPPO',
+    月均降雨量: 2326
+  }, {
+    name: '手机',
+    月份: 'vivo',
+    月均降雨量: 1576
+  }, {
+    name: '手机',
+    月份: '中兴',
+    月均降雨量: 900
+  }, {
+    name: '手机',
+    月份: '魅族',
+    月均降雨量: 831
+  }]
+ var chart = new F2.Chart({
+    id: 'chart1',
+    pixelRatio: window.devicePixelRatio
+  });
+  chart.source(data, {
+    '月均降雨量': {
+      tickCount: 5
+    }
+  });
+  chart.tooltip({
+    custom: true, // 自定义 tooltip 内容框
+    onChange: function onChange(obj) {
+      var legend = chart.get('legendController').legends.top[0];
+      var tooltipItems = obj.items;
+      var legendItems = legend.items;
+      var map = {};
+      legendItems.map(function(item) {
+        map[item.name] = _.clone(item);
+      });
+      tooltipItems.map(function(item) {
+        var name = item.name;
+        var value = item.value;
+        if (map[name]) {
+          map[name].value = value;
+        }
+      });
+      legend.setItems(_.values(map));
+    },
+    onHide: function onHide() {
+      var legend = chart.get('legendController').legends.top[0];
+      legend.setItems(chart.getLegendItems().country);
+    }
+  });
+  chart.interval().position('月份*月均降雨量').color('name').adjust('stack');
+  chart.render();
+
+
+  var data = [{
+    name: '最热词',
+    月份: '中国',
+    月均降雨量: 81064
+  }, {
+    name: '最热词',
+    月份: '市场',
+    月均降雨量: 64612
+  }, {
+    name: '最热词',
+    月份: '美国',
+    月均降雨量: 52610
+  }, {
+    name: '最热词',
+    月份: '企业',
+    月均降雨量: 52464
+  }, {
+    name: '最热词',
+    月份: '亿元',
+    月均降雨量: 46573
+  }, {
+    name: '最热词',
+    月份: '发展',
+    月均降雨量: 45340
+  }, {
+    name: '最热词',
+    月份: '投资',
+    月均降雨量: 40574
+  }, {
+    name: '最热词',
+    月份: '产品',
+    月均降雨量: 40211
+  }];
+  var chart = new F2.Chart({
+    id: 'chart4',
+    pixelRatio: window.devicePixelRatio
+  });
+  chart.source(data, {
+    '月均降雨量': {
+      tickCount: 5
+    }
+  });
+  chart.tooltip({
+    custom: true, // 自定义 tooltip 内容框
+    onChange: function onChange(obj) {
+      var legend = chart.get('legendController').legends.top[0];
+      var tooltipItems = obj.items;
+      var legendItems = legend.items;
+      var map = {};
+      legendItems.map(function(item) {
+        map[item.name] = _.clone(item);
+      });
+      tooltipItems.map(function(item) {
+        var name = item.name;
+        var value = item.value;
+        if (map[name]) {
+          map[name].value = value;
+        }
+      });
+      legend.setItems(_.values(map));
+    },
+    onHide: function onHide() {
+      var legend = chart.get('legendController').legends.top[0];
+      legend.setItems(chart.getLegendItems().country);
+    }
+  });
+  chart.interval().position('月份*月均降雨量').color('name').adjust('stack');
+  chart.render();
+
+
+
+
+
+
+
+
+</script>
+    <!-- Callout -->
+    <section class="callout">
+      <div class="container text-center">
+        <h2 class="mx-auto mb-5">Welcome to
+          <em>your</em>
+          next website!</h2>
+        <a class="btn btn-primary btn-xl" href="#">Download Now!</a>
+      </div>
+    </section>
+
+    <!-- Portfolio -->
+    <section class="content-section" id="portfolio">
+      <div class="container">
+        <div class="content-section-heading text-center">
+          <h3 class="text-secondary mb-0">news</h3>
+          <h2 class="mb-5">近期新闻</h2>
+        </div>
+        <div class="row no-gutters" id="nicenews"> 
+   
+
+      
+
+        </div>
+        <script>
+          getnicenews()
+          function getnicenews(){
+             $.ajax({
+              url: "/getnicenews",
+              type: "post",
+              datatype: "json",
+              data: {
+                 
+              },
+              success: function(data){
+                $('#nicenews').html(data)
+               
+              },
+              fail: function(err){
+                alert('网络错误')
+              }
+  })
+          }
+        </script>
+      </div>
+      <button class="btn btn-xl btn-light mr-4" style="float: right" onclick="getnicenews()">
+        换一批
+      </button>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="content-section bg-primary text-white">
+      <div class="container text-center">
+        <h2 class="mb-4">What we have?</h2>
+        <a href="#" class="btn btn-xl btn-light mr-4">风雪楼</a>
+        <a href="#" class="btn btn-xl btn-dark">话聊</a>
+      </div>
+    </section>
+    
+
+
+    <!-- Footer -->
+    <footer class="footer text-center">
+      <div class="container">
+        <ul class="list-inline mb-5">
+          <li class="list-inline-item">
+            <a class="social-link rounded-circle text-white mr-3" href="#">
+              <i class="icon-social-facebook"></i>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a class="social-link rounded-circle text-white mr-3" href="#">
+              <i class="icon-social-twitter"></i>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a class="social-link rounded-circle text-white" href="#">
+              <i class="icon-social-github"></i>
+            </a>
+          </li>
+        </ul>
+        
+      </div>
+    </footer>
+
+
+
+<!--     <div id="loading">
+    <img src="/images/loading.gif">
+</div>
+ -->
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded js-scroll-trigger" href="#tou">
+      <i class="fa fa-angle-up"></i>
+    </a>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for this template -->
+    <script src="/javascripts/stylish-portfolio.min.js"></script>
+<!-- <script>
+  $('#loading').hide();
+</script> -->
+
+  </body>
+
+</html>

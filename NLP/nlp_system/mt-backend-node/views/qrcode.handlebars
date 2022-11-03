@@ -1,0 +1,260 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <title>Stylish Portfolio - Start Bootstrap Template</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/css/stylish-portfolio.min.css" rel="stylesheet">
+
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/f2/3.3.8/f2-all.min.js"></script>
+
+<script src="https://gw.alipayobjects.com/os/antv/assets/lib/jquery-3.2.1.min.js"></script>
+
+<script src="/qrcode.min.js"></script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.js"></script>
+
+
+	<style>
+	.login_box{
+		position: absolute;
+	    top: 50%;
+	    left: 50%;
+	    margin-left: -190px;
+	    margin-top: -270px;
+	    border-radius: 4px;
+	    -moz-border-radius: 4px;
+	    -webkit-border-radius: 4px;
+	    background-color: #fff;
+	    width: 380px;
+	    height: 540px;
+	    box-shadow: 0 2px 10px #999;
+	    -moz-box-shadow: #999 0 2px 10px;
+	    -webkit-box-shadow: #999 0 2px 10px;
+	}
+	.login {
+    display: none;
+    height: 100%;
+    min-width: 860px;
+    min-height: 700px;
+    overflow: auto;
+    position: relative;
+}
+	.bodybody{
+	    font-family: Helvetica Neue,Helvetica,Hiragino Sans GB,Microsoft YaHei,\\5FAE\8F6F\96C5\9ED1,Arial,sans-serif;
+    	background: url('/img/bg-callout.jpg') no-repeat 50%;
+    	background-size: cover;
+	}
+		    .inner{
+  position:absolute;
+  top: 90;left: 90;
+  font: bold 20px/1.5 '宋体';
+  height: 200px;
+  width: 200px;
+  
+  background:hsla(0,0%,100%,.8);
+}
+	</style>
+
+	</head>
+	<body class="bodybody">
+    <script>
+        // checkflag()
+        // function checkflag(){
+        //    var storge = window.localStorage;
+        //    var flag = storge.getItem('flag')
+        //    var account = storge.getItem('account')
+        //    if(flag == 1){
+        //        $.ajax({
+        //       url: "/getuserinfo",
+        //       type: "POST",
+        //       datatype: "json",
+        //       data: {
+        //           account: account
+        //       },
+        //       success: function(data){
+
+        //           $('#').html()
+        //       }
+        //     )}
+        //       }
+           
+        //    else{
+        //     alert('未登陆')
+        //       location.href = 'loginpage'
+        //    }
+        // }
+    </script>
+		<div class="login ng-scope"></div>
+		<div class="login_box">
+      <div id="zhezhao"></div>
+			<div id="qrcodediv" style="padding: 90px" ></div>		
+            
+           	<div id="ajaxresult" style="text-align: center;padding-bottom: 30px ">查询中</div>   
+           	<div style="padding-left: 115px"><button id="getqrcode_again" class="btn btn-primary js-scroll-trigger" style="width: 150px; height: 40px" hidden="true">重新获取</button>  </div>
+        </div>
+    	</div>
+		<script>
+			 var webkey = '{{webkey}}';
+			console.log(webkey)
+
+              var qrcode = new QRCode(document.getElementById("qrcodediv"), {
+                width : 200,
+                height : 200
+              });
+          
+              function makeCode (webkey) {    
+                var elText = webkey;
+                
+                qrcode.makeCode(elText);
+              }
+
+              makeCode(webkey);
+
+
+           
+
+          	ajax_webkey(webkey)
+          	temp = 1;
+            function ajax_webkey(webkey){
+              $.ajax({
+              url: "/ajax_webkey",
+              type: "POST",
+              datatype: "json",
+              data: {
+                  webkey: webkey
+              },
+              success: function(data){
+              	console.log(temp, data.key)
+              	let yrmf = data.key 
+              	temp++;
+              	if(yrmf == -2){
+                  $("#zhezhao").addClass("inner");
+              		$('#ajaxresult').html('二维码过期了,点击重新获取二维码')
+              		$("#getqrcode_again").prop("hidden",false); 
+              		//过期了，重新请求二维码
+              		console.log('fuck')
+              		return;
+
+              	}
+              	if(yrmf == 0){
+              		console.log(webkey)
+              		console.log('key====0000000,  继续请求')
+              		setTimeout('ajax_webkey(webkey)',2000);//5秒后定时发送请求
+              	}
+              	if(yrmf == 1){
+                  $("#zhezhao").addClass("inner");
+              		//有人扫了
+              		$('#ajaxresult').html('已经扫描，等待确定')
+              		//给二维码加个遮罩
+              		setTimeout('ajax_webkey(webkey)',2000);//5秒后定时发送请求
+              	}
+              	if(yrmf == 2){
+                  $("#zhezhao").addClass("inner");
+              		console.log(data)
+                  var storge = window.localStorage;
+
+                  console.log(data.list[0].province)
+                  storge["nickname"] = data.list[0].nickName;
+                  storge["openId"] = data.list[0].openId;
+                  storge["province"] = data.list[0].province;
+                  storge["avatarUrl"] = data.list[0].avatarUrl;
+                  storge["city"] = data.list[0].city;
+                  storge["country"] = data.list[0].country;
+                  storge["province"] = data.list[0].province;
+                        		//openid 和 list -》cookie
+              		$('#ajaxresult').html('确定了，即将跳转')
+              		//跳转首页
+                  
+                  tiaozhuan()
+                  
+              	}
+              	if(yrmf == -1){
+                  $("#zhezhao").addClass("inner");
+              		$('#ajaxresult').html('已取消,点击重新获取二维码')
+              		$("#getqrcode_again").prop("hidden",false); 
+              		//取消了，重新请求二维码
+              		return;
+              	}
+              	if(yrmf == -3){
+                  $("#zhezhao").addClass("inner");
+              		$('#ajaxresult').html('服务器有错误')
+              		$("#getqrcode_again").prop("hidden",false); 
+              		//取消了，重新请求二维码
+              		return;
+              	}
+              },
+              fail: function(err){
+
+              }
+  			})
+            }
+function tiaozhuan(){
+
+
+      window.InterValObj; //timer变量，控制时间
+      window.count = 5; //间隔函数，1秒执行
+      window.curCount;//当前剩余秒数
+      $(document).ready(function(){
+          window.curCount = window.count;
+          var dealType; //验证方式
+          InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
+      }); 
+    
+    }      
+       
+        
+        
+        //timer处理函数
+  function SetRemainTime() {
+            if (curCount == 0) {
+                window.clearInterval(InterValObj);//停止计时器
+                window.storge = window.localStorage;
+                window.place = storge.getItem('province')
+                var url = "s?place=" + place 
+                console.log(url)
+                location.href = url; 
+            }
+            else {
+                curCount--;
+                $("#ajaxresult").text("系统会在" + curCount +"秒后自动跳转首页！");
+            }
+        }
+    
+          </script>
+          <script>
+  $("#getqrcode_again").click(function () {
+          		console.log('hahah')
+          		// $("#getqrcode_again").prop("hidden",true); 
+          		// $.ajax({
+          		// 	url: '/updateqrcode',
+          		// 	type: 'post',
+          		// 	datatype: 'json',
+          		// 	data: {},
+          		// 	success: function(data){
+          		// 		$('#ajaxresult').html('查询中')
+          		// 		makeCode(data.webkey);
+          		// 		ajax_webkey(data.webkey)
+          		// 	},
+          		// 	fail: function(err){
+          		// 		console.log(err)
+          		// 	}
+          		// })
+          		location.reload()
+          	})
+          </script>
+	</body>
+</html>

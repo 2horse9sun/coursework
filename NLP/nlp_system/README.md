@@ -1,11 +1,11 @@
-# NLP系统
+# NLP system
 
-机器翻译
+A project for Natural Language Processing course (Fall 2020).
 
-情感分析
+- ArticleSpider: a web crawler using scrapy .
+- emoji_predict: Emotion Analysis
+- MT: Machine Translation(en to zh)
+- NER: Name Entity Recognition
+- mt-backend-*: the backend of the [website](http://34.88.172.108:8888) using Flask and Node.js
+- mt-frontend: the frontend of the website using Vue.js
 
-命名实体识别
-
-网络爬虫与搜索引擎
-
-系统架构(出于服务器安全，不公开网站前后端代码)
